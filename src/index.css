@@ -1,0 +1,14 @@
+/*
+  Prevent iOS Safari from auto-zooming when an input is focused.
+  Safari zooms if the input font-size is below 16px.
+  max(16px, 1em) keeps Mantine's relative sizing intact for larger sizes.
+*/
+input,
+select,
+textarea {
+  font-size: max(16px, 1em) !important;
+}
+
+body {
+  background-color: #F5F0E8;
+}

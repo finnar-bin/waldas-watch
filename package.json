@@ -1,0 +1,42 @@
+{
+  "name": "waldas-watch",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "db:link:dev": "dotenv -e .env.development -- supabase link --project-ref $SUPABASE_PROJECT_REF_DEV",
+    "db:link:prod": "dotenv -e .env.production -- supabase link --project-ref $SUPABASE_PROJECT_REF_PROD",
+    "db:push:dev": "dotenv -e .env.development -- supabase db push",
+    "db:push:prod": "dotenv -e .env.production -- supabase db push",
+    "db:list": "supabase migration list"
+  },
+  "dependencies": {
+    "@mantine/core": "^7.14.0",
+    "@mantine/dates": "^7.17.8",
+    "@mantine/form": "^7.17.8",
+    "@mantine/hooks": "^7.14.0",
+    "@supabase/supabase-js": "^2.52.0",
+    "@tanstack/query-sync-storage-persister": "^5.67.0",
+    "@tanstack/react-query": "^5.67.0",
+    "@tanstack/react-query-persist-client": "^5.67.0",
+    "@tanstack/react-router": "^1.95.0",
+    "dayjs": "^1.11.20",
+    "lucide-react": "^0.479.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "^1.95.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "dotenv-cli": "^8.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^0.21.0"
+  }
+}
