@@ -12,6 +12,11 @@ export interface UpdateSheetInput {
   description: string | null
 }
 
+export async function deleteSheet(sheetId: string): Promise<void> {
+  const { error } = await supabase.from('sheets').delete().eq('id', sheetId)
+  if (error) throw error
+}
+
 export async function updateSheet(sheetId: string, input: UpdateSheetInput): Promise<void> {
   const { error } = await supabase
     .from('sheets')
