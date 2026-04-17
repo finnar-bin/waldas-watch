@@ -23,6 +23,7 @@ import { useSheetCurrencyQuery } from "@/queries/use-sheet-currency-query";
 import { useCategoryTransactionsQuery } from "@/queries/use-category-transactions-query";
 import { useCategoryQuery } from "@/queries/use-category-query";
 import { formatCurrency } from "@/utils/format-currency";
+import { getInitials } from "@/lib/get-initials";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
@@ -216,16 +217,7 @@ function CategoryTransactionsPage() {
               const date = new Date(tx.date + "T00:00:00");
               const monthAbbr = MONTH_ABBR[date.getMonth()];
               const day = date.getDate();
-              const creatorInitials = (
-                tx.creatorDisplayName ??
-                tx.creatorEmail ??
-                "?"
-              )
-                .split(" ")
-                .map((w) => w[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase();
+              const creatorInitials = getInitials(tx.creatorDisplayName, tx.creatorEmail);
 
               return (
                 <div
@@ -293,7 +285,7 @@ function CategoryTransactionsPage() {
                         )}
                         <Group gap={4} mt={2}>
                           <Avatar
-                            src={tx.creatorAvatarUrl}
+                            src={tx.creatorAvatarUrl ?? undefined}
                             size={16}
                             radius="xl"
                             color="teal"

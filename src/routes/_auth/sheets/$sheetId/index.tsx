@@ -20,6 +20,7 @@ import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { formatCurrency } from "@/utils/format-currency";
 import { formatDate, formatMonthYear } from "@/utils/format-date";
 import { TransactionCategoryIcon } from "@/components/TransactionCategoryIcon";
+import { getInitials } from "@/lib/get-initials";
 
 export const Route = createFileRoute("/_auth/sheets/$sheetId/")({
   component: SheetHomePage,
@@ -208,8 +209,8 @@ function SheetHomePage() {
                   </Text>
                   {tx.creatorName && (
                     <Group gap={4} align="center">
-                      <Avatar src={tx.creatorAvatarUrl} size={14} radius="xl">
-                        {tx.creatorName.charAt(0).toUpperCase()}
+                      <Avatar src={tx.creatorAvatarUrl ?? undefined} size={14} radius="xl" color="teal">
+                        {getInitials(tx.creatorName, tx.creatorEmail)}
                       </Avatar>
                       <Text size="xs" c="dimmed">
                         {tx.creatorName}

@@ -6,6 +6,7 @@ export type SheetMember = {
   role: 'viewer' | 'editor' | 'admin'
   displayName: string | null
   email: string | null
+  avatarUrl: string | null
 }
 
 export type SheetInvite = {
@@ -35,23 +36,38 @@ async function hashToken(token: string): Promise<string> {
 }
 
 export async function getSheetMembers(sheetId: string): Promise<SheetMember[]> {
-  const { data, error } = await supabase
+  const { data: sheetUsers, error: sheetUsersError } = await supabase
     .from('sheet_users')
-    .select('id, user_id, role, profiles(display_name, email)')
+    .select('id, user_id, role')
     .eq('sheet_id', sheetId)
     .order('created_at', { ascending: true })
 
-  if (error) throw error
+  if (sheetUsersError) throw sheetUsersError
+  if (!sheetUsers?.length) return []
 
-  return (data ?? []).map((row) => {
-    const profile = row.profiles as unknown as { display_name: string | null; email: string | null } | null
+  const userIds = sheetUsers.map((u) => u.user_id)
 
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, display_name, email, avatar_url')
+    .in('id', userIds)
+
+  if (profilesError) throw profilesError
+
+  type ProfileRow = { id: string; display_name: string | null; email: string | null; avatar_url: string | null }
+  const profileMap = new Map(
+    (profiles ?? []).map((p) => [p.id, p as ProfileRow]),
+  )
+
+  return sheetUsers.map((row) => {
+    const profile = profileMap.get(row.user_id)
     return {
       id: row.id,
       userId: row.user_id,
       role: row.role as SheetMember['role'],
       displayName: profile?.display_name ?? null,
       email: profile?.email ?? null,
+      avatarUrl: profile?.avatar_url ?? null,
     }
   })
 }

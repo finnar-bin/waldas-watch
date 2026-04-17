@@ -22,6 +22,7 @@ import { useSheetInvitesQuery } from '@/queries/use-sheet-invites-query'
 import { useRevokeInviteMutation } from '@/queries/use-revoke-invite-mutation'
 import { useRemoveSheetMemberMutation } from '@/queries/use-remove-sheet-member-mutation'
 import type { SheetMember, SheetInvite } from '@/lib/sheet-members-requests'
+import { getInitials } from '@/lib/get-initials'
 
 export const Route = createFileRoute('/_auth/sheets/$sheetId/settings/manage-users/')({
   component: ManageUsersPage,
@@ -31,16 +32,6 @@ const ROLE_COLORS: Record<string, string> = {
   admin: 'teal',
   editor: 'blue',
   viewer: 'gray',
-}
-
-function getInitials(name: string | null, email: string | null): string {
-  const source = name || email || '?'
-  return source
-    .split(/[\s@]/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
 }
 
 function ManageUsersPage() {
@@ -202,7 +193,7 @@ function ManageUsersPage() {
                     }}
                   >
                     <Group gap="sm">
-                      <Avatar radius="xl" size="sm" color="teal">
+                      <Avatar radius="xl" size="sm" color="teal" src={member.avatarUrl ?? undefined}>
                         {getInitials(member.displayName, member.email)}
                       </Avatar>
                       <div>

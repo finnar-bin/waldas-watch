@@ -21,11 +21,7 @@ import { Route as AuthSheetsSheetIdTransactionFormRouteImport } from './routes/_
 import { Route as AuthSheetsSheetIdSettingsRouteImport } from './routes/_auth/sheets/$sheetId/settings'
 import { Route as AuthSheetsSheetIdSettingsIndexRouteImport } from './routes/_auth/sheets/$sheetId/settings/index'
 import { Route as AuthSheetsSheetIdOverviewIndexRouteImport } from './routes/_auth/sheets/$sheetId/overview/index'
-import { Route as AuthSheetsSheetIdSettingsRecurringTransactionsRouteImport } from './routes/_auth/sheets/$sheetId/settings/recurring-transactions'
-import { Route as AuthSheetsSheetIdSettingsPaymentTypesRouteImport } from './routes/_auth/sheets/$sheetId/settings/payment-types'
-import { Route as AuthSheetsSheetIdSettingsManageUsersRouteImport } from './routes/_auth/sheets/$sheetId/settings/manage-users'
 import { Route as AuthSheetsSheetIdSettingsGeneralRouteImport } from './routes/_auth/sheets/$sheetId/settings/general'
-import { Route as AuthSheetsSheetIdSettingsCategoriesRouteImport } from './routes/_auth/sheets/$sheetId/settings/categories'
 import { Route as AuthSheetsSheetIdSettingsRecurringTransactionsIndexRouteImport } from './routes/_auth/sheets/$sheetId/settings/recurring-transactions/index'
 import { Route as AuthSheetsSheetIdSettingsPaymentTypesIndexRouteImport } from './routes/_auth/sheets/$sheetId/settings/payment-types/index'
 import { Route as AuthSheetsSheetIdSettingsManageUsersIndexRouteImport } from './routes/_auth/sheets/$sheetId/settings/manage-users/index'
@@ -103,59 +99,35 @@ const AuthSheetsSheetIdOverviewIndexRoute =
     path: '/overview/',
     getParentRoute: () => AuthSheetsSheetIdRoute,
   } as any)
-const AuthSheetsSheetIdSettingsRecurringTransactionsRoute =
-  AuthSheetsSheetIdSettingsRecurringTransactionsRouteImport.update({
-    id: '/recurring-transactions',
-    path: '/recurring-transactions',
-    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
-  } as any)
-const AuthSheetsSheetIdSettingsPaymentTypesRoute =
-  AuthSheetsSheetIdSettingsPaymentTypesRouteImport.update({
-    id: '/payment-types',
-    path: '/payment-types',
-    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
-  } as any)
-const AuthSheetsSheetIdSettingsManageUsersRoute =
-  AuthSheetsSheetIdSettingsManageUsersRouteImport.update({
-    id: '/manage-users',
-    path: '/manage-users',
-    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
-  } as any)
 const AuthSheetsSheetIdSettingsGeneralRoute =
   AuthSheetsSheetIdSettingsGeneralRouteImport.update({
     id: '/general',
     path: '/general',
     getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
-const AuthSheetsSheetIdSettingsCategoriesRoute =
-  AuthSheetsSheetIdSettingsCategoriesRouteImport.update({
-    id: '/categories',
-    path: '/categories',
-    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
-  } as any)
 const AuthSheetsSheetIdSettingsRecurringTransactionsIndexRoute =
   AuthSheetsSheetIdSettingsRecurringTransactionsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthSheetsSheetIdSettingsRecurringTransactionsRoute,
+    id: '/recurring-transactions/',
+    path: '/recurring-transactions/',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsPaymentTypesIndexRoute =
   AuthSheetsSheetIdSettingsPaymentTypesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthSheetsSheetIdSettingsPaymentTypesRoute,
+    id: '/payment-types/',
+    path: '/payment-types/',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsManageUsersIndexRoute =
   AuthSheetsSheetIdSettingsManageUsersIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthSheetsSheetIdSettingsManageUsersRoute,
+    id: '/manage-users/',
+    path: '/manage-users/',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsCategoriesIndexRoute =
   AuthSheetsSheetIdSettingsCategoriesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthSheetsSheetIdSettingsCategoriesRoute,
+    id: '/categories/',
+    path: '/categories/',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdOverviewCategoryIdIndexRoute =
   AuthSheetsSheetIdOverviewCategoryIdIndexRouteImport.update({
@@ -165,45 +137,45 @@ const AuthSheetsSheetIdOverviewCategoryIdIndexRoute =
   } as any)
 const AuthSheetsSheetIdSettingsRecurringTransactionsNewRoute =
   AuthSheetsSheetIdSettingsRecurringTransactionsNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => AuthSheetsSheetIdSettingsRecurringTransactionsRoute,
+    id: '/recurring-transactions/new',
+    path: '/recurring-transactions/new',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRoute =
   AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRouteImport.update({
-    id: '/$recurringId',
-    path: '/$recurringId',
-    getParentRoute: () => AuthSheetsSheetIdSettingsRecurringTransactionsRoute,
+    id: '/recurring-transactions/$recurringId',
+    path: '/recurring-transactions/$recurringId',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsPaymentTypesNewRoute =
   AuthSheetsSheetIdSettingsPaymentTypesNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => AuthSheetsSheetIdSettingsPaymentTypesRoute,
+    id: '/payment-types/new',
+    path: '/payment-types/new',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRoute =
   AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRouteImport.update({
-    id: '/$paymentTypeId',
-    path: '/$paymentTypeId',
-    getParentRoute: () => AuthSheetsSheetIdSettingsPaymentTypesRoute,
+    id: '/payment-types/$paymentTypeId',
+    path: '/payment-types/$paymentTypeId',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsManageUsersInviteRoute =
   AuthSheetsSheetIdSettingsManageUsersInviteRouteImport.update({
-    id: '/invite',
-    path: '/invite',
-    getParentRoute: () => AuthSheetsSheetIdSettingsManageUsersRoute,
+    id: '/manage-users/invite',
+    path: '/manage-users/invite',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsCategoriesNewRoute =
   AuthSheetsSheetIdSettingsCategoriesNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => AuthSheetsSheetIdSettingsCategoriesRoute,
+    id: '/categories/new',
+    path: '/categories/new',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdSettingsCategoriesCategoryIdRoute =
   AuthSheetsSheetIdSettingsCategoriesCategoryIdRouteImport.update({
-    id: '/$categoryId',
-    path: '/$categoryId',
-    getParentRoute: () => AuthSheetsSheetIdSettingsCategoriesRoute,
+    id: '/categories/$categoryId',
+    path: '/categories/$categoryId',
+    getParentRoute: () => AuthSheetsSheetIdSettingsRoute,
   } as any)
 const AuthSheetsSheetIdOverviewCategoryIdEditRoute =
   AuthSheetsSheetIdOverviewCategoryIdEditRouteImport.update({
@@ -222,11 +194,7 @@ export interface FileRoutesByFullPath {
   '/sheets/$sheetId/settings': typeof AuthSheetsSheetIdSettingsRouteWithChildren
   '/sheets/$sheetId/transaction-form': typeof AuthSheetsSheetIdTransactionFormRoute
   '/sheets/$sheetId/': typeof AuthSheetsSheetIdIndexRoute
-  '/sheets/$sheetId/settings/categories': typeof AuthSheetsSheetIdSettingsCategoriesRouteWithChildren
   '/sheets/$sheetId/settings/general': typeof AuthSheetsSheetIdSettingsGeneralRoute
-  '/sheets/$sheetId/settings/manage-users': typeof AuthSheetsSheetIdSettingsManageUsersRouteWithChildren
-  '/sheets/$sheetId/settings/payment-types': typeof AuthSheetsSheetIdSettingsPaymentTypesRouteWithChildren
-  '/sheets/$sheetId/settings/recurring-transactions': typeof AuthSheetsSheetIdSettingsRecurringTransactionsRouteWithChildren
   '/sheets/$sheetId/overview/': typeof AuthSheetsSheetIdOverviewIndexRoute
   '/sheets/$sheetId/settings/': typeof AuthSheetsSheetIdSettingsIndexRoute
   '/sheets/$sheetId/overview/$categoryId/edit': typeof AuthSheetsSheetIdOverviewCategoryIdEditRoute
@@ -280,11 +248,7 @@ export interface FileRoutesById {
   '/_auth/sheets/$sheetId/settings': typeof AuthSheetsSheetIdSettingsRouteWithChildren
   '/_auth/sheets/$sheetId/transaction-form': typeof AuthSheetsSheetIdTransactionFormRoute
   '/_auth/sheets/$sheetId/': typeof AuthSheetsSheetIdIndexRoute
-  '/_auth/sheets/$sheetId/settings/categories': typeof AuthSheetsSheetIdSettingsCategoriesRouteWithChildren
   '/_auth/sheets/$sheetId/settings/general': typeof AuthSheetsSheetIdSettingsGeneralRoute
-  '/_auth/sheets/$sheetId/settings/manage-users': typeof AuthSheetsSheetIdSettingsManageUsersRouteWithChildren
-  '/_auth/sheets/$sheetId/settings/payment-types': typeof AuthSheetsSheetIdSettingsPaymentTypesRouteWithChildren
-  '/_auth/sheets/$sheetId/settings/recurring-transactions': typeof AuthSheetsSheetIdSettingsRecurringTransactionsRouteWithChildren
   '/_auth/sheets/$sheetId/overview/': typeof AuthSheetsSheetIdOverviewIndexRoute
   '/_auth/sheets/$sheetId/settings/': typeof AuthSheetsSheetIdSettingsIndexRoute
   '/_auth/sheets/$sheetId/overview/$categoryId/edit': typeof AuthSheetsSheetIdOverviewCategoryIdEditRoute
@@ -313,11 +277,7 @@ export interface FileRouteTypes {
     | '/sheets/$sheetId/settings'
     | '/sheets/$sheetId/transaction-form'
     | '/sheets/$sheetId/'
-    | '/sheets/$sheetId/settings/categories'
     | '/sheets/$sheetId/settings/general'
-    | '/sheets/$sheetId/settings/manage-users'
-    | '/sheets/$sheetId/settings/payment-types'
-    | '/sheets/$sheetId/settings/recurring-transactions'
     | '/sheets/$sheetId/overview/'
     | '/sheets/$sheetId/settings/'
     | '/sheets/$sheetId/overview/$categoryId/edit'
@@ -370,11 +330,7 @@ export interface FileRouteTypes {
     | '/_auth/sheets/$sheetId/settings'
     | '/_auth/sheets/$sheetId/transaction-form'
     | '/_auth/sheets/$sheetId/'
-    | '/_auth/sheets/$sheetId/settings/categories'
     | '/_auth/sheets/$sheetId/settings/general'
-    | '/_auth/sheets/$sheetId/settings/manage-users'
-    | '/_auth/sheets/$sheetId/settings/payment-types'
-    | '/_auth/sheets/$sheetId/settings/recurring-transactions'
     | '/_auth/sheets/$sheetId/overview/'
     | '/_auth/sheets/$sheetId/settings/'
     | '/_auth/sheets/$sheetId/overview/$categoryId/edit'
@@ -486,27 +442,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSheetsSheetIdOverviewIndexRouteImport
       parentRoute: typeof AuthSheetsSheetIdRoute
     }
-    '/_auth/sheets/$sheetId/settings/recurring-transactions': {
-      id: '/_auth/sheets/$sheetId/settings/recurring-transactions'
-      path: '/recurring-transactions'
-      fullPath: '/sheets/$sheetId/settings/recurring-transactions'
-      preLoaderRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
-    }
-    '/_auth/sheets/$sheetId/settings/payment-types': {
-      id: '/_auth/sheets/$sheetId/settings/payment-types'
-      path: '/payment-types'
-      fullPath: '/sheets/$sheetId/settings/payment-types'
-      preLoaderRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
-    }
-    '/_auth/sheets/$sheetId/settings/manage-users': {
-      id: '/_auth/sheets/$sheetId/settings/manage-users'
-      path: '/manage-users'
-      fullPath: '/sheets/$sheetId/settings/manage-users'
-      preLoaderRoute: typeof AuthSheetsSheetIdSettingsManageUsersRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
-    }
     '/_auth/sheets/$sheetId/settings/general': {
       id: '/_auth/sheets/$sheetId/settings/general'
       path: '/general'
@@ -514,40 +449,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsGeneralRouteImport
       parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
-    '/_auth/sheets/$sheetId/settings/categories': {
-      id: '/_auth/sheets/$sheetId/settings/categories'
-      path: '/categories'
-      fullPath: '/sheets/$sheetId/settings/categories'
-      preLoaderRoute: typeof AuthSheetsSheetIdSettingsCategoriesRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
-    }
     '/_auth/sheets/$sheetId/settings/recurring-transactions/': {
       id: '/_auth/sheets/$sheetId/settings/recurring-transactions/'
-      path: '/'
+      path: '/recurring-transactions'
       fullPath: '/sheets/$sheetId/settings/recurring-transactions/'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsIndexRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/payment-types/': {
       id: '/_auth/sheets/$sheetId/settings/payment-types/'
-      path: '/'
+      path: '/payment-types'
       fullPath: '/sheets/$sheetId/settings/payment-types/'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesIndexRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/manage-users/': {
       id: '/_auth/sheets/$sheetId/settings/manage-users/'
-      path: '/'
+      path: '/manage-users'
       fullPath: '/sheets/$sheetId/settings/manage-users/'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsManageUsersIndexRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsManageUsersRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/categories/': {
       id: '/_auth/sheets/$sheetId/settings/categories/'
-      path: '/'
+      path: '/categories'
       fullPath: '/sheets/$sheetId/settings/categories/'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsCategoriesIndexRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsCategoriesRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/overview/$categoryId/': {
       id: '/_auth/sheets/$sheetId/overview/$categoryId/'
@@ -558,52 +486,52 @@ declare module '@tanstack/react-router' {
     }
     '/_auth/sheets/$sheetId/settings/recurring-transactions/new': {
       id: '/_auth/sheets/$sheetId/settings/recurring-transactions/new'
-      path: '/new'
+      path: '/recurring-transactions/new'
       fullPath: '/sheets/$sheetId/settings/recurring-transactions/new'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsNewRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/recurring-transactions/$recurringId': {
       id: '/_auth/sheets/$sheetId/settings/recurring-transactions/$recurringId'
-      path: '/$recurringId'
+      path: '/recurring-transactions/$recurringId'
       fullPath: '/sheets/$sheetId/settings/recurring-transactions/$recurringId'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/payment-types/new': {
       id: '/_auth/sheets/$sheetId/settings/payment-types/new'
-      path: '/new'
+      path: '/payment-types/new'
       fullPath: '/sheets/$sheetId/settings/payment-types/new'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesNewRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/payment-types/$paymentTypeId': {
       id: '/_auth/sheets/$sheetId/settings/payment-types/$paymentTypeId'
-      path: '/$paymentTypeId'
+      path: '/payment-types/$paymentTypeId'
       fullPath: '/sheets/$sheetId/settings/payment-types/$paymentTypeId'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/manage-users/invite': {
       id: '/_auth/sheets/$sheetId/settings/manage-users/invite'
-      path: '/invite'
+      path: '/manage-users/invite'
       fullPath: '/sheets/$sheetId/settings/manage-users/invite'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsManageUsersInviteRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsManageUsersRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/categories/new': {
       id: '/_auth/sheets/$sheetId/settings/categories/new'
-      path: '/new'
+      path: '/categories/new'
       fullPath: '/sheets/$sheetId/settings/categories/new'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsCategoriesNewRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsCategoriesRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/settings/categories/$categoryId': {
       id: '/_auth/sheets/$sheetId/settings/categories/$categoryId'
-      path: '/$categoryId'
+      path: '/categories/$categoryId'
       fullPath: '/sheets/$sheetId/settings/categories/$categoryId'
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsCategoriesCategoryIdRouteImport
-      parentRoute: typeof AuthSheetsSheetIdSettingsCategoriesRoute
+      parentRoute: typeof AuthSheetsSheetIdSettingsRoute
     }
     '/_auth/sheets/$sheetId/overview/$categoryId/edit': {
       id: '/_auth/sheets/$sheetId/overview/$categoryId/edit'
@@ -615,109 +543,49 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthSheetsSheetIdSettingsCategoriesRouteChildren {
+interface AuthSheetsSheetIdSettingsRouteChildren {
+  AuthSheetsSheetIdSettingsGeneralRoute: typeof AuthSheetsSheetIdSettingsGeneralRoute
+  AuthSheetsSheetIdSettingsIndexRoute: typeof AuthSheetsSheetIdSettingsIndexRoute
   AuthSheetsSheetIdSettingsCategoriesCategoryIdRoute: typeof AuthSheetsSheetIdSettingsCategoriesCategoryIdRoute
   AuthSheetsSheetIdSettingsCategoriesNewRoute: typeof AuthSheetsSheetIdSettingsCategoriesNewRoute
-  AuthSheetsSheetIdSettingsCategoriesIndexRoute: typeof AuthSheetsSheetIdSettingsCategoriesIndexRoute
-}
-
-const AuthSheetsSheetIdSettingsCategoriesRouteChildren: AuthSheetsSheetIdSettingsCategoriesRouteChildren =
-  {
-    AuthSheetsSheetIdSettingsCategoriesCategoryIdRoute:
-      AuthSheetsSheetIdSettingsCategoriesCategoryIdRoute,
-    AuthSheetsSheetIdSettingsCategoriesNewRoute:
-      AuthSheetsSheetIdSettingsCategoriesNewRoute,
-    AuthSheetsSheetIdSettingsCategoriesIndexRoute:
-      AuthSheetsSheetIdSettingsCategoriesIndexRoute,
-  }
-
-const AuthSheetsSheetIdSettingsCategoriesRouteWithChildren =
-  AuthSheetsSheetIdSettingsCategoriesRoute._addFileChildren(
-    AuthSheetsSheetIdSettingsCategoriesRouteChildren,
-  )
-
-interface AuthSheetsSheetIdSettingsManageUsersRouteChildren {
   AuthSheetsSheetIdSettingsManageUsersInviteRoute: typeof AuthSheetsSheetIdSettingsManageUsersInviteRoute
-  AuthSheetsSheetIdSettingsManageUsersIndexRoute: typeof AuthSheetsSheetIdSettingsManageUsersIndexRoute
-}
-
-const AuthSheetsSheetIdSettingsManageUsersRouteChildren: AuthSheetsSheetIdSettingsManageUsersRouteChildren =
-  {
-    AuthSheetsSheetIdSettingsManageUsersInviteRoute:
-      AuthSheetsSheetIdSettingsManageUsersInviteRoute,
-    AuthSheetsSheetIdSettingsManageUsersIndexRoute:
-      AuthSheetsSheetIdSettingsManageUsersIndexRoute,
-  }
-
-const AuthSheetsSheetIdSettingsManageUsersRouteWithChildren =
-  AuthSheetsSheetIdSettingsManageUsersRoute._addFileChildren(
-    AuthSheetsSheetIdSettingsManageUsersRouteChildren,
-  )
-
-interface AuthSheetsSheetIdSettingsPaymentTypesRouteChildren {
   AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRoute
   AuthSheetsSheetIdSettingsPaymentTypesNewRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesNewRoute
-  AuthSheetsSheetIdSettingsPaymentTypesIndexRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesIndexRoute
-}
-
-const AuthSheetsSheetIdSettingsPaymentTypesRouteChildren: AuthSheetsSheetIdSettingsPaymentTypesRouteChildren =
-  {
-    AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRoute:
-      AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRoute,
-    AuthSheetsSheetIdSettingsPaymentTypesNewRoute:
-      AuthSheetsSheetIdSettingsPaymentTypesNewRoute,
-    AuthSheetsSheetIdSettingsPaymentTypesIndexRoute:
-      AuthSheetsSheetIdSettingsPaymentTypesIndexRoute,
-  }
-
-const AuthSheetsSheetIdSettingsPaymentTypesRouteWithChildren =
-  AuthSheetsSheetIdSettingsPaymentTypesRoute._addFileChildren(
-    AuthSheetsSheetIdSettingsPaymentTypesRouteChildren,
-  )
-
-interface AuthSheetsSheetIdSettingsRecurringTransactionsRouteChildren {
   AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRoute
   AuthSheetsSheetIdSettingsRecurringTransactionsNewRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsNewRoute
+  AuthSheetsSheetIdSettingsCategoriesIndexRoute: typeof AuthSheetsSheetIdSettingsCategoriesIndexRoute
+  AuthSheetsSheetIdSettingsManageUsersIndexRoute: typeof AuthSheetsSheetIdSettingsManageUsersIndexRoute
+  AuthSheetsSheetIdSettingsPaymentTypesIndexRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesIndexRoute
   AuthSheetsSheetIdSettingsRecurringTransactionsIndexRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsIndexRoute
-}
-
-const AuthSheetsSheetIdSettingsRecurringTransactionsRouteChildren: AuthSheetsSheetIdSettingsRecurringTransactionsRouteChildren =
-  {
-    AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRoute:
-      AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRoute,
-    AuthSheetsSheetIdSettingsRecurringTransactionsNewRoute:
-      AuthSheetsSheetIdSettingsRecurringTransactionsNewRoute,
-    AuthSheetsSheetIdSettingsRecurringTransactionsIndexRoute:
-      AuthSheetsSheetIdSettingsRecurringTransactionsIndexRoute,
-  }
-
-const AuthSheetsSheetIdSettingsRecurringTransactionsRouteWithChildren =
-  AuthSheetsSheetIdSettingsRecurringTransactionsRoute._addFileChildren(
-    AuthSheetsSheetIdSettingsRecurringTransactionsRouteChildren,
-  )
-
-interface AuthSheetsSheetIdSettingsRouteChildren {
-  AuthSheetsSheetIdSettingsCategoriesRoute: typeof AuthSheetsSheetIdSettingsCategoriesRouteWithChildren
-  AuthSheetsSheetIdSettingsGeneralRoute: typeof AuthSheetsSheetIdSettingsGeneralRoute
-  AuthSheetsSheetIdSettingsManageUsersRoute: typeof AuthSheetsSheetIdSettingsManageUsersRouteWithChildren
-  AuthSheetsSheetIdSettingsPaymentTypesRoute: typeof AuthSheetsSheetIdSettingsPaymentTypesRouteWithChildren
-  AuthSheetsSheetIdSettingsRecurringTransactionsRoute: typeof AuthSheetsSheetIdSettingsRecurringTransactionsRouteWithChildren
-  AuthSheetsSheetIdSettingsIndexRoute: typeof AuthSheetsSheetIdSettingsIndexRoute
 }
 
 const AuthSheetsSheetIdSettingsRouteChildren: AuthSheetsSheetIdSettingsRouteChildren =
   {
-    AuthSheetsSheetIdSettingsCategoriesRoute:
-      AuthSheetsSheetIdSettingsCategoriesRouteWithChildren,
     AuthSheetsSheetIdSettingsGeneralRoute:
       AuthSheetsSheetIdSettingsGeneralRoute,
-    AuthSheetsSheetIdSettingsManageUsersRoute:
-      AuthSheetsSheetIdSettingsManageUsersRouteWithChildren,
-    AuthSheetsSheetIdSettingsPaymentTypesRoute:
-      AuthSheetsSheetIdSettingsPaymentTypesRouteWithChildren,
-    AuthSheetsSheetIdSettingsRecurringTransactionsRoute:
-      AuthSheetsSheetIdSettingsRecurringTransactionsRouteWithChildren,
     AuthSheetsSheetIdSettingsIndexRoute: AuthSheetsSheetIdSettingsIndexRoute,
+    AuthSheetsSheetIdSettingsCategoriesCategoryIdRoute:
+      AuthSheetsSheetIdSettingsCategoriesCategoryIdRoute,
+    AuthSheetsSheetIdSettingsCategoriesNewRoute:
+      AuthSheetsSheetIdSettingsCategoriesNewRoute,
+    AuthSheetsSheetIdSettingsManageUsersInviteRoute:
+      AuthSheetsSheetIdSettingsManageUsersInviteRoute,
+    AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRoute:
+      AuthSheetsSheetIdSettingsPaymentTypesPaymentTypeIdRoute,
+    AuthSheetsSheetIdSettingsPaymentTypesNewRoute:
+      AuthSheetsSheetIdSettingsPaymentTypesNewRoute,
+    AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRoute:
+      AuthSheetsSheetIdSettingsRecurringTransactionsRecurringIdRoute,
+    AuthSheetsSheetIdSettingsRecurringTransactionsNewRoute:
+      AuthSheetsSheetIdSettingsRecurringTransactionsNewRoute,
+    AuthSheetsSheetIdSettingsCategoriesIndexRoute:
+      AuthSheetsSheetIdSettingsCategoriesIndexRoute,
+    AuthSheetsSheetIdSettingsManageUsersIndexRoute:
+      AuthSheetsSheetIdSettingsManageUsersIndexRoute,
+    AuthSheetsSheetIdSettingsPaymentTypesIndexRoute:
+      AuthSheetsSheetIdSettingsPaymentTypesIndexRoute,
+    AuthSheetsSheetIdSettingsRecurringTransactionsIndexRoute:
+      AuthSheetsSheetIdSettingsRecurringTransactionsIndexRoute,
   }
 
 const AuthSheetsSheetIdSettingsRouteWithChildren =
