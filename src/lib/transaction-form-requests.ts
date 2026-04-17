@@ -135,6 +135,34 @@ export async function getSheetTransactionOverview(
   )
 }
 
+export type UpdateSheetTransactionInput = {
+  amount: number
+  type: 'income' | 'expense'
+  date: string
+  categoryId: string
+  paymentTypeId: string | null
+  description: string | null
+}
+
+export async function updateSheetTransaction(
+  transactionId: string,
+  input: UpdateSheetTransactionInput,
+): Promise<void> {
+  const { error } = await supabase
+    .from('transactions')
+    .update({
+      amount: input.amount,
+      type: input.type,
+      date: input.date,
+      category_id: input.categoryId,
+      payment_type_id: input.paymentTypeId,
+      description: input.description,
+    })
+    .eq('id', transactionId)
+
+  if (error) throw error
+}
+
 export async function createSheetTransaction(
   input: CreateSheetTransactionInput,
 ): Promise<void> {

@@ -1,5 +1,38 @@
 import { supabase } from './supabase-client'
 
+export type TransactionDetail = {
+  id: string
+  amount: number
+  type: 'income' | 'expense'
+  description: string | null
+  date: string
+  categoryId: string
+  paymentTypeId: string | null
+}
+
+export async function getTransactionById(
+  transactionId: string,
+): Promise<TransactionDetail | null> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('id, amount, type, description, date, category_id, payment_type_id')
+    .eq('id', transactionId)
+    .single()
+
+  if (error) throw error
+  if (!data) return null
+
+  return {
+    id: data.id,
+    amount: Number(data.amount),
+    type: data.type as 'income' | 'expense',
+    description: data.description ?? null,
+    date: data.date,
+    categoryId: data.category_id,
+    paymentTypeId: data.payment_type_id ?? null,
+  }
+}
+
 export type CategoryTransaction = {
   id: string
   amount: number
@@ -11,6 +44,15 @@ export type CategoryTransaction = {
   creatorDisplayName: string | null
   creatorEmail: string | null
   creatorAvatarUrl: string | null
+}
+
+export async function deleteTransaction(transactionId: string): Promise<void> {
+  const { error } = await supabase
+    .from('transactions')
+    .delete()
+    .eq('id', transactionId)
+
+  if (error) throw error
 }
 
 export async function getCategoryTransactions(

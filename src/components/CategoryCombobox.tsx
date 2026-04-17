@@ -7,6 +7,7 @@ interface CategoryComboboxProps {
   value: string | null
   onChange: (value: string | null) => void
   error?: React.ReactNode
+  disabled?: boolean
 }
 
 export function CategoryCombobox({
@@ -15,6 +16,7 @@ export function CategoryCombobox({
   value,
   onChange,
   error,
+  disabled,
 }: CategoryComboboxProps) {
   return (
     <IconCombobox
@@ -24,6 +26,7 @@ export function CategoryCombobox({
       value={value}
       onChange={onChange}
       error={error}
+      disabled={disabled}
     />
   )
 }

@@ -7,5 +7,10 @@ export const theme = createTheme({
         root: { backgroundColor: 'var(--mantine-color-white)' },
       },
     },
+    InputWrapper: {
+      styles: {
+        label: { fontWeight: 600 },
+      },
+    },
   },
 })

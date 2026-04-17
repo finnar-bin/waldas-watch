@@ -25,6 +25,7 @@ interface IconComboboxProps {
   value: string | null
   onChange: (value: string | null) => void
   error?: React.ReactNode
+  disabled?: boolean
 }
 
 export function IconCombobox({
@@ -34,6 +35,7 @@ export function IconCombobox({
   value,
   onChange,
   error,
+  disabled = false,
 }: IconComboboxProps) {
   const [search, setSearch] = useState('')
 
@@ -62,7 +64,7 @@ export function IconCombobox({
 
   return (
     <Stack gap={4}>
-      {label && <InputLabel>{label}</InputLabel>}
+      {label && <InputLabel disabled={disabled}>{label}</InputLabel>}
       <Combobox
         store={combobox}
         onOptionSubmit={(val) => {
@@ -81,15 +83,17 @@ export function IconCombobox({
             rightSectionPointerEvents="none"
             value={search || (combobox.dropdownOpened ? '' : (selected?.name ?? ''))}
             onChange={(e) => {
+              if (disabled) return
               setSearch(e.currentTarget.value)
               combobox.openDropdown()
               combobox.updateSelectedOptionIndex()
             }}
-            onClick={() => combobox.openDropdown()}
-            onFocus={() => combobox.openDropdown()}
+            onClick={() => { if (!disabled) combobox.openDropdown() }}
+            onFocus={() => { if (!disabled) combobox.openDropdown() }}
             onBlur={() => combobox.closeDropdown()}
             placeholder={placeholder}
             error={!!error}
+            disabled={disabled}
           />
         </Combobox.Target>
 
