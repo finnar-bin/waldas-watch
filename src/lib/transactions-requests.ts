@@ -1,5 +1,58 @@
 import { supabase } from './supabase-client'
 
+export type CategoryTransaction = {
+  id: string
+  amount: number
+  type: 'income' | 'expense'
+  description: string | null
+  date: string
+  paymentTypeName: string | null
+  paymentTypeIcon: string | null
+  creatorDisplayName: string | null
+  creatorEmail: string | null
+  creatorAvatarUrl: string | null
+}
+
+export async function getCategoryTransactions(
+  sheetId: string,
+  categoryId: string,
+  year: number,
+  month: number,
+): Promise<CategoryTransaction[]> {
+  const { data, error } = await supabase.rpc('category_transactions', {
+    target_sheet_id: sheetId,
+    target_category_id: categoryId,
+    target_year: year,
+    target_month: month - 1,
+  })
+
+  if (error) throw error
+
+  return (data ?? []).map((row: {
+    transaction_id: string
+    amount: number
+    transaction_type: string
+    description: string | null
+    transaction_date: string
+    payment_type_name: string | null
+    payment_type_icon: string | null
+    creator_display_name: string | null
+    creator_email: string | null
+    creator_avatar_url: string | null
+  }) => ({
+    id: row.transaction_id,
+    amount: Number(row.amount),
+    type: row.transaction_type as 'income' | 'expense',
+    description: row.description,
+    date: row.transaction_date,
+    paymentTypeName: row.payment_type_name,
+    paymentTypeIcon: row.payment_type_icon,
+    creatorDisplayName: row.creator_display_name,
+    creatorEmail: row.creator_email,
+    creatorAvatarUrl: row.creator_avatar_url,
+  }))
+}
+
 export type RecentSheetTransaction = {
   id: string
   amount: number

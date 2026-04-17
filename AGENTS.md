@@ -32,6 +32,10 @@ This file defines coding preferences for AI assistants working in this repo.
 - Outside `src/utils`, use `*-utils.ts` for pure helpers/sanitizers/formatters with no Supabase calls.
 - Do not mix request code and helper code in the same module.
 
+## React Patterns
+
+- Do not use IIFEs (`(() => { ... })()`) inside JSX to compute derived values. Use `useMemo` at the top of the component instead to keep JSX readable and derived logic traceable.
+
 ## State Management
 
 - Separate server state from client/UI state.

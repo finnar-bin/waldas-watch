@@ -34,6 +34,33 @@ export type CreateSheetTransactionInput = {
   description: string | null
 }
 
+export type CategoryDetail = {
+  id: string
+  name: string
+  icon: string
+  type: 'income' | 'expense'
+  budget: number | null
+}
+
+export async function getCategoryById(categoryId: string): Promise<CategoryDetail | null> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, icon, type, budget')
+    .eq('id', categoryId)
+    .single()
+
+  if (error) throw error
+  if (!data) return null
+
+  return {
+    id: data.id,
+    name: data.name,
+    icon: data.icon,
+    type: data.type as 'income' | 'expense',
+    budget: data.budget != null ? Number(data.budget) : null,
+  }
+}
+
 export async function getSheetTransactionCategories(
   sheetId: string,
   type: 'income' | 'expense',

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import {
   Box,
   Center,
@@ -149,7 +149,18 @@ function DashboardPage() {
                   : "gray";
 
               return (
-                <Paper key={cat.categoryId} radius="lg" p="sm" shadow="sm">
+                <Link
+                  key={cat.categoryId}
+                  to="/sheets/$sheetId/category/$categoryId"
+                  params={{ sheetId, categoryId: cat.categoryId }}
+                  search={{ year, month, type }}
+                  style={{ display: "block", textDecoration: "none", color: "inherit" }}
+                >
+                <Paper
+                  radius="lg"
+                  p="sm"
+                  shadow="sm"
+                >
                   <Group justify="space-between" mb={8}>
                     <Group gap="xs">
                       <TransactionCategoryIcon
@@ -183,6 +194,7 @@ function DashboardPage() {
                   </Group>
                   <Progress value={barValue} color={barColor} size="sm" />
                 </Paper>
+                </Link>
               );
             });
           })()}

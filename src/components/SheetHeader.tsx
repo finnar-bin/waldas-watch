@@ -18,7 +18,7 @@ export function SheetHeader({ sheetName, pageTitle }: SheetHeaderProps) {
 
   return (
     <Flex align="center" justify="space-between" px="md" py="sm">
-      <div>
+      <div style={{ minWidth: 0 }}>
         <Text
           size="xs"
           c="teal.9"
@@ -28,7 +28,7 @@ export function SheetHeader({ sheetName, pageTitle }: SheetHeaderProps) {
         >
           {sheetName}
         </Text>
-        <Title order={3} fw={900} lh={1.3}>
+        <Title order={3} fw={900} lh={1.3} truncate>
           {pageTitle}
         </Title>
       </div>
