@@ -1,48 +1,50 @@
-import { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useForm } from '@mantine/form'
-import { Box, Button, Select, Stack, Text, TextInput } from '@mantine/core'
-import { SheetHeader } from '@/components/SheetHeader'
-import { BackLink } from '@/components/BackLink'
-import { useSession } from '@/providers/SessionProvider'
-import { useUserSheetsQuery } from '@/queries/use-user-sheets-query'
-import { useInviteUserMutation } from '@/queries/use-invite-user-mutation'
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useForm } from "@mantine/form";
+import { Box, Button, Select, Stack, Text, TextInput } from "@mantine/core";
+import { SheetHeader } from "@/components/SheetHeader";
+import { BackLink } from "@/components/BackLink";
+import { useSession } from "@/providers/SessionProvider";
+import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
+import { useInviteUserMutation } from "@/queries/use-invite-user-mutation";
 
 export const Route = createFileRoute(
-  '/_auth/sheets/$sheetId/settings/manage-users/invite',
+  "/_auth/sheets/$sheetId/settings/manage-users/invite",
 )({
   component: InviteUserPage,
-})
+});
 
 const ROLE_OPTIONS = [
-  { value: 'viewer', label: 'Viewer' },
-  { value: 'editor', label: 'Editor' },
-  { value: 'admin', label: 'Admin' },
-]
+  { value: "viewer", label: "Viewer" },
+  { value: "editor", label: "Editor" },
+  { value: "admin", label: "Admin" },
+];
 
 interface FormValues {
-  email: string
-  role: 'viewer' | 'editor' | 'admin'
+  email: string;
+  role: "viewer" | "editor" | "admin";
 }
 
 function InviteUserPage() {
-  const { sheetId } = Route.useParams()
-  const { session } = useSession()
-  const navigate = useNavigate()
+  const { sheetId } = Route.useParams();
+  const { session } = useSession();
+  const navigate = useNavigate();
 
-  const { data: sheets } = useUserSheetsQuery(session?.user.id)
-  const sheetName = sheets?.find((s) => s.id === sheetId)?.name ?? '…'
+  const { data: sheets } = useUserSheetsQuery(session?.user.id);
+  const sheetName = sheets?.find((s) => s.id === sheetId)?.name ?? "…";
 
-  const inviteMutation = useInviteUserMutation(sheetId)
-  const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const inviteMutation = useInviteUserMutation(sheetId);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
-    initialValues: { email: '', role: 'viewer' },
+    initialValues: { email: "", role: "viewer" },
     validate: {
       email: (v) =>
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : 'Enter a valid email',
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
+          ? null
+          : "Enter a valid email",
     },
-  })
+  });
 
   async function handleSubmit(values: FormValues) {
     const result = await inviteMutation.mutateAsync({
@@ -50,8 +52,8 @@ function InviteUserPage() {
       invitedEmail: values.email.trim(),
       role: values.role,
       invitedBy: session!.user.id,
-    })
-    setInviteLink(result.inviteUrl)
+    });
+    setInviteLink(result.inviteUrl);
   }
 
   const backLink = (
@@ -60,7 +62,7 @@ function InviteUserPage() {
       params={{ sheetId }}
       label="Manage Users"
     />
-  )
+  );
 
   if (inviteLink) {
     return (
@@ -75,11 +77,16 @@ function InviteUserPage() {
               readOnly
               onClick={(e) => e.currentTarget.select()}
             />
-            <Text size="xs" c="dimmed">Expires in 7 days.</Text>
+            <Text size="xs" c="dimmed">
+              Expires in 7 days.
+            </Text>
             <Button
               color="teal"
               onClick={() =>
-                navigate({ to: '/sheets/$sheetId/settings/manage-users', params: { sheetId } })
+                navigate({
+                  to: "/sheets/$sheetId/settings/manage-users",
+                  params: { sheetId },
+                })
               }
             >
               Done
@@ -87,7 +94,7 @@ function InviteUserPage() {
           </Stack>
         </Box>
       </Box>
-    )
+    );
   }
 
   return (
@@ -100,22 +107,25 @@ function InviteUserPage() {
             <TextInput
               label="Email"
               placeholder="name@example.com"
-              withAsterisk
-              {...form.getInputProps('email')}
+              {...form.getInputProps("email")}
             />
             <Select
               label="Role"
               data={ROLE_OPTIONS}
               allowDeselect={false}
-              withAsterisk
-              {...form.getInputProps('role')}
+              {...form.getInputProps("role")}
             />
-            <Button type="submit" color="teal" loading={inviteMutation.isPending} mt="xs">
+            <Button
+              type="submit"
+              color="teal"
+              loading={inviteMutation.isPending}
+              mt="xs"
+            >
               Send invite
             </Button>
           </Stack>
         </form>
       </Box>
     </Box>
-  )
+  );
 }

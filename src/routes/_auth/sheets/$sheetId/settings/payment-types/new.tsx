@@ -70,7 +70,6 @@ function NewPaymentTypePage() {
             <TextInput
               label="Name"
               placeholder="e.g. Debit Card, Cash"
-              withAsterisk
               {...form.getInputProps("name")}
             />
             <IconPickerGrid

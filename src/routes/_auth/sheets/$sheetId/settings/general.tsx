@@ -68,8 +68,10 @@ function GeneralSettingsPage() {
   const isPending = sheetPending || currencyPending;
   const isSuccess = sheetSuccess && currencySuccess;
 
-  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] =
-    useDisclosure(false);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
   const [deleteConfirmValue, setDeleteConfirmValue] = useState("");
 
   const form = useForm<FormValues>({
@@ -97,7 +99,10 @@ function GeneralSettingsPage() {
     };
 
     mutateSheet(
-      { name: values.name.trim(), description: values.description.trim() || null },
+      {
+        name: values.name.trim(),
+        description: values.description.trim() || null,
+      },
       { onSuccess: onBothDone },
     );
     mutateCurrency(
@@ -133,14 +138,18 @@ function GeneralSettingsPage() {
           <Text component="span" fw={600}>
             {sheetName}
           </Text>{" "}
-          along with all its transactions, categories, and settings. No undo,
-          no recovery, no take-backs.
+          along with all its transactions, categories, and settings. No undo, no
+          recovery, no take-backs.
         </Text>
         <TextInput
           mt="md"
           label={
             <Text size="sm" mb={4}>
-              Type <Text component="span" fw={600}>{sheetName}</Text> to confirm
+              Type{" "}
+              <Text component="span" fw={600}>
+                {sheetName}
+              </Text>{" "}
+              to confirm
             </Text>
           }
           placeholder={sheetName}
@@ -175,7 +184,6 @@ function GeneralSettingsPage() {
               <TextInput
                 label="Name"
                 placeholder="e.g. Household expenses, Europe trip 🌍"
-                withAsterisk
                 {...form.getInputProps("name")}
               />
               <Textarea
@@ -190,7 +198,6 @@ function GeneralSettingsPage() {
                 searchable
                 allowDeselect={false}
                 {...form.getInputProps("currency")}
-                withAsterisk
               />
               <Button
                 type="submit"

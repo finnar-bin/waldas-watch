@@ -66,6 +66,12 @@ function NewRecurringPage() {
       categoryId: (v) => (v.length === 0 ? "Category is required" : null),
       amount: (v) =>
         v === "" || Number(v) <= 0 ? "Enter a valid amount" : null,
+      paymentTypeId: (v, values) => {
+        console.log("value", v, values);
+        return values.type === "expense" && !v
+          ? "Payment type is required"
+          : null;
+      },
     },
   });
 
@@ -127,7 +133,6 @@ function NewRecurringPage() {
                 { value: "income", label: "Income" },
               ]}
               allowDeselect={false}
-              withAsterisk
               value={form.values.type}
               onChange={(v) => handleTypeChange(v as "income" | "expense")}
               error={form.errors.type}
@@ -147,7 +152,7 @@ function NewRecurringPage() {
             {form.values.type === "expense" && (
               <IconCombobox
                 label="Payment type"
-                placeholder="Select (optional)"
+                placeholder="Select a payment type"
                 items={paymentTypes.map((p) => ({
                   id: p.id,
                   name: p.name,
@@ -155,6 +160,7 @@ function NewRecurringPage() {
                 }))}
                 value={form.values.paymentTypeId || null}
                 onChange={(v) => form.setFieldValue("paymentTypeId", v ?? "")}
+                error={form.errors.paymentTypeId}
               />
             )}
             <NumberInput
@@ -162,14 +168,12 @@ function NewRecurringPage() {
               placeholder="0.00"
               min={0.01}
               decimalScale={2}
-              withAsterisk
               {...form.getInputProps("amount")}
             />
             <Select
               label="Frequency"
               data={FREQUENCY_OPTIONS}
               allowDeselect={false}
-              withAsterisk
               {...form.getInputProps("frequency")}
             />
             {form.values.frequency === "monthly" && (

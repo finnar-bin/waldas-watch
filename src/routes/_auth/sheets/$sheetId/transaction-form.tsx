@@ -63,7 +63,10 @@ function TransactionFormPage() {
         String(values.date!.getDate()).padStart(2, "0"),
       ].join("-"),
       categoryId: values.categoryId!,
-      paymentTypeId: values.paymentTypeId,
+      paymentTypeId:
+        values.type === "expense" && values.paymentTypeId
+          ? values.paymentTypeId
+          : null,
       description: values.description.trim() || null,
     });
 
@@ -95,7 +98,11 @@ function TransactionFormPage() {
             </Text>
           )}
           <Group grow mt="xs">
-            <Button variant="default" onClick={handleCancel} disabled={mutation.isPending}>
+            <Button
+              variant="default"
+              onClick={handleCancel}
+              disabled={mutation.isPending}
+            >
               Cancel
             </Button>
             <Button type="submit" color="teal" loading={mutation.isPending}>

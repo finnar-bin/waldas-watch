@@ -95,13 +95,11 @@ function NewCategoryPage() {
                 { value: "income", label: "Income" },
               ]}
               allowDeselect={false}
-              withAsterisk
               {...form.getInputProps("type")}
             />
             <TextInput
               label="Name"
               placeholder="e.g. Groceries, Salary"
-              withAsterisk
               {...form.getInputProps("name")}
             />
             <IconPickerGrid
