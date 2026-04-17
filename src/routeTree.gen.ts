@@ -19,8 +19,8 @@ import { Route as AuthSheetsSheetIdRouteImport } from './routes/_auth/sheets/$sh
 import { Route as AuthSheetsSheetIdIndexRouteImport } from './routes/_auth/sheets/$sheetId/index'
 import { Route as AuthSheetsSheetIdTransactionFormRouteImport } from './routes/_auth/sheets/$sheetId/transaction-form'
 import { Route as AuthSheetsSheetIdSettingsRouteImport } from './routes/_auth/sheets/$sheetId/settings'
-import { Route as AuthSheetsSheetIdDashboardRouteImport } from './routes/_auth/sheets/$sheetId/dashboard'
-import { Route as AuthSheetsSheetIdCategoryCategoryIdRouteImport } from './routes/_auth/sheets/$sheetId/category/$categoryId'
+import { Route as AuthSheetsSheetIdOverviewIndexRouteImport } from './routes/_auth/sheets/$sheetId/overview/index'
+import { Route as AuthSheetsSheetIdOverviewCategoryIdRouteImport } from './routes/_auth/sheets/$sheetId/overview/$categoryId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -73,16 +73,16 @@ const AuthSheetsSheetIdSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthSheetsSheetIdRoute,
   } as any)
-const AuthSheetsSheetIdDashboardRoute =
-  AuthSheetsSheetIdDashboardRouteImport.update({
-    id: '/dashboard',
-    path: '/dashboard',
+const AuthSheetsSheetIdOverviewIndexRoute =
+  AuthSheetsSheetIdOverviewIndexRouteImport.update({
+    id: '/overview/',
+    path: '/overview/',
     getParentRoute: () => AuthSheetsSheetIdRoute,
   } as any)
-const AuthSheetsSheetIdCategoryCategoryIdRoute =
-  AuthSheetsSheetIdCategoryCategoryIdRouteImport.update({
-    id: '/category/$categoryId',
-    path: '/category/$categoryId',
+const AuthSheetsSheetIdOverviewCategoryIdRoute =
+  AuthSheetsSheetIdOverviewCategoryIdRouteImport.update({
+    id: '/overview/$categoryId',
+    path: '/overview/$categoryId',
     getParentRoute: () => AuthSheetsSheetIdRoute,
   } as any)
 
@@ -93,11 +93,11 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/sheets/$sheetId': typeof AuthSheetsSheetIdRouteWithChildren
   '/sheets/': typeof AuthSheetsIndexRoute
-  '/sheets/$sheetId/dashboard': typeof AuthSheetsSheetIdDashboardRoute
   '/sheets/$sheetId/settings': typeof AuthSheetsSheetIdSettingsRoute
   '/sheets/$sheetId/transaction-form': typeof AuthSheetsSheetIdTransactionFormRoute
   '/sheets/$sheetId/': typeof AuthSheetsSheetIdIndexRoute
-  '/sheets/$sheetId/category/$categoryId': typeof AuthSheetsSheetIdCategoryCategoryIdRoute
+  '/sheets/$sheetId/overview/$categoryId': typeof AuthSheetsSheetIdOverviewCategoryIdRoute
+  '/sheets/$sheetId/overview/': typeof AuthSheetsSheetIdOverviewIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -105,11 +105,11 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/sheets': typeof AuthSheetsIndexRoute
-  '/sheets/$sheetId/dashboard': typeof AuthSheetsSheetIdDashboardRoute
   '/sheets/$sheetId/settings': typeof AuthSheetsSheetIdSettingsRoute
   '/sheets/$sheetId/transaction-form': typeof AuthSheetsSheetIdTransactionFormRoute
   '/sheets/$sheetId': typeof AuthSheetsSheetIdIndexRoute
-  '/sheets/$sheetId/category/$categoryId': typeof AuthSheetsSheetIdCategoryCategoryIdRoute
+  '/sheets/$sheetId/overview/$categoryId': typeof AuthSheetsSheetIdOverviewCategoryIdRoute
+  '/sheets/$sheetId/overview': typeof AuthSheetsSheetIdOverviewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -120,11 +120,11 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/_auth/sheets/$sheetId': typeof AuthSheetsSheetIdRouteWithChildren
   '/_auth/sheets/': typeof AuthSheetsIndexRoute
-  '/_auth/sheets/$sheetId/dashboard': typeof AuthSheetsSheetIdDashboardRoute
   '/_auth/sheets/$sheetId/settings': typeof AuthSheetsSheetIdSettingsRoute
   '/_auth/sheets/$sheetId/transaction-form': typeof AuthSheetsSheetIdTransactionFormRoute
   '/_auth/sheets/$sheetId/': typeof AuthSheetsSheetIdIndexRoute
-  '/_auth/sheets/$sheetId/category/$categoryId': typeof AuthSheetsSheetIdCategoryCategoryIdRoute
+  '/_auth/sheets/$sheetId/overview/$categoryId': typeof AuthSheetsSheetIdOverviewCategoryIdRoute
+  '/_auth/sheets/$sheetId/overview/': typeof AuthSheetsSheetIdOverviewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -135,11 +135,11 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/sheets/$sheetId'
     | '/sheets/'
-    | '/sheets/$sheetId/dashboard'
     | '/sheets/$sheetId/settings'
     | '/sheets/$sheetId/transaction-form'
     | '/sheets/$sheetId/'
-    | '/sheets/$sheetId/category/$categoryId'
+    | '/sheets/$sheetId/overview/$categoryId'
+    | '/sheets/$sheetId/overview/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -147,11 +147,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/auth/callback'
     | '/sheets'
-    | '/sheets/$sheetId/dashboard'
     | '/sheets/$sheetId/settings'
     | '/sheets/$sheetId/transaction-form'
     | '/sheets/$sheetId'
-    | '/sheets/$sheetId/category/$categoryId'
+    | '/sheets/$sheetId/overview/$categoryId'
+    | '/sheets/$sheetId/overview'
   id:
     | '__root__'
     | '/'
@@ -161,11 +161,11 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/_auth/sheets/$sheetId'
     | '/_auth/sheets/'
-    | '/_auth/sheets/$sheetId/dashboard'
     | '/_auth/sheets/$sheetId/settings'
     | '/_auth/sheets/$sheetId/transaction-form'
     | '/_auth/sheets/$sheetId/'
-    | '/_auth/sheets/$sheetId/category/$categoryId'
+    | '/_auth/sheets/$sheetId/overview/$categoryId'
+    | '/_auth/sheets/$sheetId/overview/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -248,38 +248,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSheetsSheetIdSettingsRouteImport
       parentRoute: typeof AuthSheetsSheetIdRoute
     }
-    '/_auth/sheets/$sheetId/dashboard': {
-      id: '/_auth/sheets/$sheetId/dashboard'
-      path: '/dashboard'
-      fullPath: '/sheets/$sheetId/dashboard'
-      preLoaderRoute: typeof AuthSheetsSheetIdDashboardRouteImport
+    '/_auth/sheets/$sheetId/overview/': {
+      id: '/_auth/sheets/$sheetId/overview/'
+      path: '/overview'
+      fullPath: '/sheets/$sheetId/overview/'
+      preLoaderRoute: typeof AuthSheetsSheetIdOverviewIndexRouteImport
       parentRoute: typeof AuthSheetsSheetIdRoute
     }
-    '/_auth/sheets/$sheetId/category/$categoryId': {
-      id: '/_auth/sheets/$sheetId/category/$categoryId'
-      path: '/category/$categoryId'
-      fullPath: '/sheets/$sheetId/category/$categoryId'
-      preLoaderRoute: typeof AuthSheetsSheetIdCategoryCategoryIdRouteImport
+    '/_auth/sheets/$sheetId/overview/$categoryId': {
+      id: '/_auth/sheets/$sheetId/overview/$categoryId'
+      path: '/overview/$categoryId'
+      fullPath: '/sheets/$sheetId/overview/$categoryId'
+      preLoaderRoute: typeof AuthSheetsSheetIdOverviewCategoryIdRouteImport
       parentRoute: typeof AuthSheetsSheetIdRoute
     }
   }
 }
 
 interface AuthSheetsSheetIdRouteChildren {
-  AuthSheetsSheetIdDashboardRoute: typeof AuthSheetsSheetIdDashboardRoute
   AuthSheetsSheetIdSettingsRoute: typeof AuthSheetsSheetIdSettingsRoute
   AuthSheetsSheetIdTransactionFormRoute: typeof AuthSheetsSheetIdTransactionFormRoute
   AuthSheetsSheetIdIndexRoute: typeof AuthSheetsSheetIdIndexRoute
-  AuthSheetsSheetIdCategoryCategoryIdRoute: typeof AuthSheetsSheetIdCategoryCategoryIdRoute
+  AuthSheetsSheetIdOverviewCategoryIdRoute: typeof AuthSheetsSheetIdOverviewCategoryIdRoute
+  AuthSheetsSheetIdOverviewIndexRoute: typeof AuthSheetsSheetIdOverviewIndexRoute
 }
 
 const AuthSheetsSheetIdRouteChildren: AuthSheetsSheetIdRouteChildren = {
-  AuthSheetsSheetIdDashboardRoute: AuthSheetsSheetIdDashboardRoute,
   AuthSheetsSheetIdSettingsRoute: AuthSheetsSheetIdSettingsRoute,
   AuthSheetsSheetIdTransactionFormRoute: AuthSheetsSheetIdTransactionFormRoute,
   AuthSheetsSheetIdIndexRoute: AuthSheetsSheetIdIndexRoute,
-  AuthSheetsSheetIdCategoryCategoryIdRoute:
-    AuthSheetsSheetIdCategoryCategoryIdRoute,
+  AuthSheetsSheetIdOverviewCategoryIdRoute:
+    AuthSheetsSheetIdOverviewCategoryIdRoute,
+  AuthSheetsSheetIdOverviewIndexRoute: AuthSheetsSheetIdOverviewIndexRoute,
 }
 
 const AuthSheetsSheetIdRouteWithChildren =

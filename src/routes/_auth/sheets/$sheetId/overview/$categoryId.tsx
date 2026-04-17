@@ -62,7 +62,7 @@ const MONTH_ABBR = [
 ];
 
 export const Route = createFileRoute(
-  "/_auth/sheets/$sheetId/category/$categoryId",
+  "/_auth/sheets/$sheetId/overview/$categoryId",
 )({
   validateSearch: (search: Record<string, unknown>) => ({
     year: typeof search.year === "number" ? search.year : currentYear,
@@ -93,7 +93,7 @@ function CategoryTransactionsPage() {
 
   const budget = category?.budget ?? null;
   const totalAmount = useMemo(
-    () => transactions?.reduce((sum, tx) => sum + tx.amount, 0) ?? 0,
+    () => transactions?.reduce((sum: number, tx) => sum + tx.amount, 0) ?? 0,
     [transactions],
   );
   const budgetPct = budget != null ? (totalAmount / budget) * 100 : null;
@@ -121,8 +121,8 @@ function CategoryTransactionsPage() {
       <SheetHeader sheetName={sheetName} pageTitle={category?.name ?? "…"} />
 
       <Link
-        to="/sheets/$sheetId/dashboard"
-        params={{ sheetId }}
+        to="/sheets/$sheetId/overview"
+        params={() => ({ sheetId })}
         search={{ year, month, type }}
         style={{
           display: "inline-flex",
@@ -136,7 +136,7 @@ function CategoryTransactionsPage() {
         }}
       >
         <ChevronLeft size={14} />
-        Dashboard
+        Overview
       </Link>
 
       <Stack gap="md" p="md">

@@ -42,16 +42,16 @@ const MONTHS = [
   { value: "12", label: "December" },
 ];
 
-export const Route = createFileRoute("/_auth/sheets/$sheetId/dashboard")({
+export const Route = createFileRoute("/_auth/sheets/$sheetId/overview/")({
   validateSearch: (search: Record<string, unknown>) => ({
     year: typeof search.year === "number" ? search.year : currentYear,
     month: typeof search.month === "number" ? search.month : currentMonth,
     type: search.type === "income" ? "income" : ("expense" as "expense" | "income"),
   }),
-  component: DashboardPage,
+  component: OverviewPage,
 });
 
-function DashboardPage() {
+function OverviewPage() {
   const { sheetId } = Route.useParams();
   const { year, month, type } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
@@ -82,7 +82,7 @@ function DashboardPage() {
 
   return (
     <Box pb="md">
-      <SheetHeader sheetName={sheetName} pageTitle="Dashboard" />
+      <SheetHeader sheetName={sheetName} pageTitle="Overview" />
 
       <Stack gap="md" p="md">
         <Group grow>
@@ -151,7 +151,7 @@ function DashboardPage() {
               return (
                 <Link
                   key={cat.categoryId}
-                  to="/sheets/$sheetId/category/$categoryId"
+                  to="/sheets/$sheetId/overview/$categoryId"
                   params={{ sheetId, categoryId: cat.categoryId }}
                   search={{ year, month, type }}
                   style={{ display: "block", textDecoration: "none", color: "inherit" }}

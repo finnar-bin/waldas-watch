@@ -7,6 +7,7 @@ interface NavItemProps {
   params: { sheetId: string };
   icon: React.ElementType;
   label: string;
+  exactPath?: boolean;
   exactSearch?: boolean;
 }
 
@@ -15,13 +16,14 @@ function NavItem({
   params,
   icon: Icon,
   label,
+  exactPath = true,
   exactSearch = true,
 }: NavItemProps) {
   return (
     <Link
       to={to}
       params={params}
-      activeOptions={{ exact: true, includeSearch: exactSearch }}
+      activeOptions={{ exact: exactPath, includeSearch: exactSearch }}
       style={{
         textDecoration: "none",
         flex: 1,
@@ -118,10 +120,11 @@ export function BottomNav({ sheetId }: BottomNavProps) {
           label="Home"
         />
         <NavItem
-          to="/sheets/$sheetId/dashboard"
+          to="/sheets/$sheetId/overview"
           params={params}
           icon={LayoutDashboard}
-          label="Dashboard"
+          label="Overview"
+          exactPath={false}
           exactSearch={false}
         />
         <NavItem
