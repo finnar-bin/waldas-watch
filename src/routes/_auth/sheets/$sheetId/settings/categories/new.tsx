@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   NumberInput,
+  Paper,
   Select,
   Stack,
   TextInput,
@@ -84,7 +85,7 @@ function NewCategoryPage() {
         params={{ sheetId }}
         label="Categories"
       />
-      <Box p="md">
+      <Paper p="md" shadow="sm" radius="lg" m="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="sm">
             <Select
@@ -135,7 +136,7 @@ function NewCategoryPage() {
             </Button>
           </Stack>
         </form>
-      </Box>
+      </Paper>
     </Box>
   );
 }

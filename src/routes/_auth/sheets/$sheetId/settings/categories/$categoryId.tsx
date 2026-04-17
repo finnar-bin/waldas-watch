@@ -1,17 +1,23 @@
 import { useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import {
   Box,
   Button,
   Center,
+  Divider,
+  Group,
   Loader,
+  Modal,
   NumberInput,
+  Paper,
   Select,
   Stack,
   Text,
   TextInput,
 } from "@mantine/core";
+import { Trash2 } from "lucide-react";
 import { SheetHeader } from "@/components/SheetHeader";
 import { BackLink } from "@/components/BackLink";
 import { IconPickerGrid } from "@/components/IconPickerGrid";
@@ -19,6 +25,7 @@ import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { useSheetCategoriesQuery } from "@/queries/use-sheet-categories-query";
 import { useUpdateCategoryMutation } from "@/queries/use-update-category-mutation";
+import { useDeleteCategoryMutation } from "@/queries/use-delete-category-mutation";
 import { ICONS } from "@/lib/constants/icons";
 
 export const Route = createFileRoute(
@@ -47,6 +54,11 @@ function EditCategoryPage() {
   const category = categories.find((c) => c.id === categoryId);
 
   const updateMutation = useUpdateCategoryMutation(sheetId);
+  const deleteMutation = useDeleteCategoryMutation(sheetId);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -74,6 +86,14 @@ function EditCategoryPage() {
     form.resetDirty();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category?.id]);
+
+  async function handleDelete() {
+    await deleteMutation.mutateAsync(categoryId);
+    navigate({
+      to: "/sheets/$sheetId/settings/categories",
+      params: { sheetId },
+    });
+  }
 
   function handleSubmit(values: FormValues) {
     updateMutation.mutate(
@@ -132,63 +152,103 @@ function EditCategoryPage() {
   }
 
   return (
-    <Box pb="md">
-      <SheetHeader sheetName={sheetName} pageTitle="Edit Category" />
-      {backLink}
-      <Box p="md">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="sm">
-            <Select
-              label="Type"
-              data={[
-                { value: "expense", label: "Expense" },
-                { value: "income", label: "Income" },
-              ]}
-              allowDeselect={false}
-              withAsterisk
-              {...form.getInputProps("type")}
-            />
-            <TextInput
-              label="Name"
-              placeholder="e.g. Groceries, Salary"
-              withAsterisk
-              {...form.getInputProps("name")}
-            />
-            <IconPickerGrid
-              label="Icon"
-              icons={ICONS}
-              value={form.values.icon}
-              onChange={(icon) => form.setFieldValue("icon", icon)}
-            />
+    <>
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title={
+          <Text size="lg" fw={700}>
+            Delete category
+          </Text>
+        }
+        centered
+      >
+        <Text size="sm">
+          Once it's gone, it's gone — this will permanently delete the category
+          and all associated data.
+        </Text>
+        <Group grow mt="lg">
+          <Button variant="default" onClick={closeDeleteModal}>
+            Cancel
+          </Button>
+          <Button
+            color="red"
+            loading={deleteMutation.isPending}
+            onClick={handleDelete}
+          >
+            Delete
+          </Button>
+        </Group>
+      </Modal>
 
-            <NumberInput
-              label="Budget"
-              description="Monthly budget limit (optional)"
-              placeholder="0.00"
-              min={0}
-              decimalScale={2}
-              {...form.getInputProps("budget")}
-            />
-            <NumberInput
-              label="Default amount"
-              description="Pre-fills the amount when adding a transaction (optional)"
-              placeholder="0.00"
-              min={0}
-              decimalScale={2}
-              {...form.getInputProps("defaultAmount")}
-            />
-            <Button
-              type="submit"
-              color="teal"
-              loading={updateMutation.isPending}
-              disabled={!form.isDirty()}
-              mt="xs"
-            >
-              Save changes
-            </Button>
-          </Stack>
-        </form>
+      <Box pb="md">
+        <SheetHeader sheetName={sheetName} pageTitle="Edit Category" />
+        {backLink}
+        <Paper p="md" shadow="sm" radius="lg" m="md">
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="sm">
+              <Select
+                label="Type"
+                data={[
+                  { value: "expense", label: "Expense" },
+                  { value: "income", label: "Income" },
+                ]}
+                allowDeselect={false}
+                withAsterisk
+                {...form.getInputProps("type")}
+              />
+              <TextInput
+                label="Name"
+                placeholder="e.g. Groceries, Salary"
+                withAsterisk
+                {...form.getInputProps("name")}
+              />
+              <IconPickerGrid
+                label="Icon"
+                icons={ICONS}
+                value={form.values.icon}
+                onChange={(icon) => form.setFieldValue("icon", icon)}
+              />
+
+              <NumberInput
+                label="Budget"
+                description="Monthly budget limit (optional)"
+                placeholder="0.00"
+                min={0}
+                decimalScale={2}
+                {...form.getInputProps("budget")}
+              />
+              <NumberInput
+                label="Default amount"
+                description="Pre-fills the amount when adding a transaction (optional)"
+                placeholder="0.00"
+                min={0}
+                decimalScale={2}
+                {...form.getInputProps("defaultAmount")}
+              />
+              <Button
+                type="submit"
+                color="teal"
+                loading={updateMutation.isPending}
+                disabled={!form.isDirty() || deleteMutation.isPending}
+                mt="xs"
+              >
+                Save changes
+              </Button>
+              <Divider />
+              <Button
+                variant="outline"
+                color="red"
+                leftSection={<Trash2 size={16} />}
+                onClick={openDeleteModal}
+                disabled={updateMutation.isPending || deleteMutation.isPending}
+              >
+                Delete category
+              </Button>
+            </Stack>
+          </form>
+        </Paper>
       </Box>
-    </Box>
+    </>
   );
 }
