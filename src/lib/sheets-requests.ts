@@ -7,6 +7,20 @@ export type UserSheet = {
   role: 'viewer' | 'editor' | 'admin'
 }
 
+export interface UpdateSheetInput {
+  name: string
+  description: string | null
+}
+
+export async function updateSheet(sheetId: string, input: UpdateSheetInput): Promise<void> {
+  const { error } = await supabase
+    .from('sheets')
+    .update({ name: input.name, description: input.description || null })
+    .eq('id', sheetId)
+
+  if (error) throw error
+}
+
 export async function getUserSheets(userId: string): Promise<UserSheet[]> {
   const { data, error } = await supabase
     .from('sheet_users')
