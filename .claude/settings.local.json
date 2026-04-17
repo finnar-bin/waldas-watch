@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://api.github.com/repos/finnar-bin/gastos-tracker-v2/contents/)",
+      "Bash(curl -s https://api.github.com/repos/finnar-bin/gastos-tracker-v2/contents/src)",
+      "Bash(curl -s https://api.github.com/repos/finnar-bin/gastos-tracker-v2/contents/src/app)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s https://api.github.com/repos/finnar-bin/gastos-tracker-v2/contents/src/app/sheet)",
+      "Bash(curl -s https://api.github.com/repos/finnar-bin/gastos-tracker-v2/contents/src/app/sheet/[sheetId])",
+      "Bash(curl -s \"https://api.github.com/repos/finnar-bin/gastos-tracker-v2/contents/src/app/sheet\")",
+      "Bash(python3 -c \"import json, sys; data = json.load\\(sys.stdin\\); [print\\(f['name']\\) for f in data if f['type'] == 'dir']\")",
+      "Bash(curl -s 'https://api.github.com/repos/finnar-bin/gastos-tracker-v2/git/trees/main?recursive=1')",
+      "Bash(python3 -c \"import json, sys; data = json.load\\(sys.stdin\\); [print\\(t['path']\\) for t in data['tree'] if 'settings' in t['path'].lower\\(\\)]\")",
+      "Bash(curl *)",
+      "Bash(python3 -c \"import json, sys; data = json.load\\(sys.stdin\\); [print\\(f['name']\\) for f in data if 'schema' in f['name']]\")",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
