@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -14,8 +14,8 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { ChevronLeft } from "lucide-react";
 import { SheetHeader } from "@/components/SheetHeader";
+import { BackLink } from "@/components/BackLink";
 import { TransactionCategoryIcon } from "@/components/TransactionCategoryIcon";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
@@ -129,24 +129,11 @@ function CategoryTransactionsPage() {
     <Box pb="md">
       <SheetHeader sheetName={sheetName} pageTitle={category?.name ?? "…"} />
 
-      <Link
+      <BackLink
         to="/sheets/$sheetId/overview"
-        params={() => ({ sheetId })}
-        search={{ year, month, type }}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 2,
-          textDecoration: "none",
-          color: "var(--mantine-color-teal-6)",
-          fontWeight: 500,
-          fontSize: "var(--mantine-font-size-sm)",
-          paddingInline: "var(--mantine-spacing-md)",
-        }}
-      >
-        <ChevronLeft size={14} />
-        Overview
-      </Link>
+        params={{ sheetId }}
+        label="Overview"
+      />
 
       <Stack gap="md" p="md">
         <Group grow>

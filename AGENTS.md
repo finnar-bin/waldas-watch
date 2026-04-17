@@ -9,6 +9,12 @@ This file defines coding preferences for AI assistants working in this repo.
 - Avoid copy-pasting logic or UI patterns across screens.
 - When a pattern appears more than once, extract a shared primitive.
 
+## Tone & Copy
+
+- This app is fun and playful. All user-facing copy (labels, placeholders, taglines, empty states, error messages) should reflect that personality.
+- Lean into Pinoy (Filipino) humor — references to sweldo, pera, bahala na, and everyday Filipino life are welcome.
+- Copy must still be accessible to non-Filipino users. Prefer Taglish over pure Tagalog, and make sure meaning is clear from context even if a word is unfamiliar.
+
 ## UI Development
 
 - Use shared UI components from `src/components` whenever available.

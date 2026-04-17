@@ -132,6 +132,7 @@ export function BottomNav({ sheetId }: BottomNavProps) {
           params={params}
           icon={Settings}
           label="Settings"
+          exactPath={false}
         />
         <AddButton sheetId={sheetId} />
       </Flex>
