@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Alert,
   Anchor,
@@ -12,52 +12,59 @@ import {
   Text,
   TextInput,
   Title,
-} from '@mantine/core'
-import { signInWithGoogle, signInWithPassword } from '@/lib/auth-requests'
-import { useSession } from '@/providers/SessionProvider'
+} from "@mantine/core";
+import { useForm, isEmail, isNotEmpty } from "@mantine/form";
+import { signInWithGoogle, signInWithPassword } from "@/lib/auth-requests";
+import { useSession } from "@/providers/SessionProvider";
+import { ShieldAlert } from "lucide-react";
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   component: LoginPage,
-})
+});
 
 function LoginPage() {
-  const { session, isLoading } = useSession()
-  const navigate = useNavigate()
+  const { session, isLoading } = useSession();
+  const navigate = useNavigate();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const form = useForm({
+    mode: "controlled",
+    initialValues: { email: "", password: "" },
+    validate: {
+      email: isEmail("Invalid email"),
+      password: isNotEmpty("Password is required"),
+    },
+  });
 
   useEffect(() => {
     if (!isLoading && session) {
-      navigate({ to: '/sheets', replace: true })
+      navigate({ to: "/sheets", replace: true });
     }
-  }, [session, isLoading, navigate])
+  }, [session, isLoading, navigate]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email || !password) return
-    setError(null)
-    setIsSubmitting(true)
+  async function handleSubmit(values: { email: string; password: string }) {
+    setError(null);
+    setIsSubmitting(true);
     try {
-      await signInWithPassword(email, password)
+      await signInWithPassword(values.email, values.password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign in failed')
+      setError(err instanceof Error ? err.message : "Sign in failed");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   async function handleGoogleSignIn() {
-    setError(null)
-    setIsGoogleLoading(true)
+    setError(null);
+    setIsGoogleLoading(true);
     try {
-      await signInWithGoogle()
+      await signInWithGoogle();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google sign in failed')
-      setIsGoogleLoading(false)
+      setError(err instanceof Error ? err.message : "Google sign in failed");
+      setIsGoogleLoading(false);
     }
   }
 
@@ -66,70 +73,72 @@ function LoginPage() {
       <Box w="100%" maw={400}>
         <Stack gap="xl">
           <Stack gap={4} align="center">
+            <img src="/favicon.svg" alt="Waldas Watch" width={64} height={64} />
             <Title order={1} size="h2">
               Waldas Watch
             </Title>
             <Text c="dimmed" size="sm">
-              Sign in to your account
+              Because &ldquo;bahala na&rdquo; is not a financial plan.
             </Text>
           </Stack>
 
           {error && (
-            <Alert color="red" variant="light">
-              {error}
-            </Alert>
+            <Alert
+              color="red"
+              variant="light"
+              title={error}
+              icon={<ShieldAlert />}
+            ></Alert>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <Stack gap="md">
-              <TextInput
-                label="Email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.currentTarget.value)}
-                required
-                autoComplete="email"
-              />
-              <PasswordInput
-                label="Password"
-                placeholder="Your password"
-                value={password}
-                onChange={(e) => setPassword(e.currentTarget.value)}
-                required
-                autoComplete="current-password"
-              />
-              <Button
-                type="submit"
-                color="teal"
-                fullWidth
-                loading={isSubmitting}
-                mt="xs"
-              >
-                Sign in
-              </Button>
-            </Stack>
-          </form>
+          <Stack gap="xs">
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+              <Stack gap="md">
+                <TextInput
+                  label="Email"
+                  type="email"
+                  placeholder="juandelacruz@pera.ph"
+                  autoComplete="email"
+                  {...form.getInputProps("email")}
+                />
+                <PasswordInput
+                  label="Password"
+                  placeholder="Your password"
+                  autoComplete="current-password"
+                  {...form.getInputProps("password")}
+                />
+                <Button
+                  type="submit"
+                  color="teal"
+                  fullWidth
+                  loading={isSubmitting}
+                  mt="xs"
+                >
+                  Sign in
+                </Button>
+              </Stack>
+            </form>
 
-          <Divider label="or" labelPosition="center" />
+            <Divider label="or" labelPosition="center" />
 
-          <Button
-            variant="default"
-            fullWidth
-            loading={isGoogleLoading}
-            onClick={handleGoogleSignIn}
-          >
-            Continue with Google
-          </Button>
+            <Button
+              variant="default"
+              fullWidth
+              loading={isGoogleLoading}
+              onClick={handleGoogleSignIn}
+            >
+              Continue with Google
+            </Button>
+          </Stack>
 
           <Text ta="center" size="sm">
-            Don&apos;t have an account?{' '}
+            Still spending blind?{" "}
             <Anchor component={Link} to="/signup" c="teal">
-              Sign up
+              Sign up.
             </Anchor>
           </Text>
         </Stack>
       </Box>
     </Center>
-  )
+  );
 }
