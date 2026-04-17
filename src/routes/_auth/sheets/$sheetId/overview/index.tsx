@@ -1,3 +1,4 @@
+import { useRef, useMemo } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import {
   Box,
@@ -11,6 +12,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { SheetHeader } from "@/components/SheetHeader";
 import { TransactionCategoryIcon } from "@/components/TransactionCategoryIcon";
 import { useSession } from "@/providers/SessionProvider";
@@ -68,16 +70,49 @@ function OverviewPage() {
     type,
   );
 
+  const items = useMemo(() => {
+    if (!categories) return [];
+    const maxAmount = Math.max(...categories.map((c) => c.totalAmount), 1);
+    return categories.map((cat) => {
+      const budgetPct =
+        cat.budget != null ? (cat.totalAmount / cat.budget) * 100 : null;
+      const isOverBudget = budgetPct != null && budgetPct > 100;
+      const isNearBudget =
+        budgetPct != null && budgetPct >= 85 && !isOverBudget;
+      const barValue =
+        cat.budget != null
+          ? Math.min(budgetPct!, 100)
+          : (cat.totalAmount / maxAmount) * 100;
+      const barColor =
+        cat.budget != null
+          ? isOverBudget
+            ? "red"
+            : isNearBudget
+              ? "orange"
+              : "teal"
+          : "gray";
+      return { cat, isOverBudget, isNearBudget, barValue, barColor };
+    });
+  }, [categories]);
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useWindowVirtualizer({
+    count: items.length,
+    estimateSize: () => 88,
+    overscan: 3,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  });
+
   function setYear(y: number) {
-    navigate({ search: (prev) => ({ ...prev, year: y }) })
+    navigate({ search: (prev) => ({ ...prev, year: y }) });
   }
 
   function setMonth(m: number) {
-    navigate({ search: (prev) => ({ ...prev, month: m }) })
+    navigate({ search: (prev) => ({ ...prev, month: m }) });
   }
 
   function setType(t: "expense" | "income") {
-    navigate({ search: (prev) => ({ ...prev, type: t }) })
+    navigate({ search: (prev) => ({ ...prev, type: t }) });
   }
 
   return (
@@ -127,78 +162,80 @@ function OverviewPage() {
           </Center>
         )}
 
-        <Stack gap="md">
-          {(() => {
-            const maxAmount = Math.max(
-              ...(categories?.map((c) => c.totalAmount) ?? [0]),
-              1,
-            );
-            return categories?.map((cat) => {
-              const budgetPct =
-                cat.budget != null ? (cat.totalAmount / cat.budget) * 100 : null;
-              const isOverBudget = budgetPct != null && budgetPct > 100;
-              const isNearBudget =
-                budgetPct != null && budgetPct >= 85 && !isOverBudget;
-              const barValue =
-                cat.budget != null
-                  ? Math.min(budgetPct!, 100)
-                  : (cat.totalAmount / maxAmount) * 100;
-              const barColor =
-                cat.budget != null
-                  ? isOverBudget ? "red" : isNearBudget ? "orange" : "teal"
-                  : "gray";
-
+        <div ref={listRef}>
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const { cat, isOverBudget, isNearBudget, barValue, barColor } =
+                items[virtualItem.index];
               return (
-                <Link
-                  key={cat.categoryId}
-                  to="/sheets/$sheetId/overview/$categoryId"
-                  params={{ sheetId, categoryId: cat.categoryId }}
-                  search={{ year, month, type }}
-                  style={{ display: "block", textDecoration: "none", color: "inherit" }}
+                <div
+                  key={virtualItem.key}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    paddingBottom: 16,
+                    transform: `translateY(${virtualItem.start - virtualizer.options.scrollMargin}px)`,
+                  }}
                 >
-                <Paper
-                  radius="lg"
-                  p="sm"
-                  shadow="sm"
-                >
-                  <Group justify="space-between" mb={8}>
-                    <Group gap="xs">
-                      <TransactionCategoryIcon
-                        icon={cat.categoryIcon}
-                        size={16}
-                      />
-                      <Text size="sm" fw={600}>
-                        {cat.categoryName}
-                      </Text>
-                      {isOverBudget && (
-                        <Text size="xs" c="red" fw={600}>
-                          Over budget
-                        </Text>
-                      )}
-                      {isNearBudget && (
-                        <Text size="xs" c="orange" fw={600}>
-                          Almost at budget
-                        </Text>
-                      )}
-                    </Group>
-                    <Stack gap={0} align="flex-end">
-                      <Text size="sm" fw={700}>
-                        {formatCurrency(cat.totalAmount, currency)}
-                      </Text>
-                      {cat.budget != null && (
-                        <Text size="xs" c="dimmed">
-                          of {formatCurrency(cat.budget, currency)}
-                        </Text>
-                      )}
-                    </Stack>
-                  </Group>
-                  <Progress value={barValue} color={barColor} size="sm" />
-                </Paper>
-                </Link>
+                  <Link
+                    to="/sheets/$sheetId/overview/$categoryId"
+                    params={{ sheetId, categoryId: cat.categoryId }}
+                    search={{ year, month, type }}
+                    style={{
+                      display: "block",
+                      textDecoration: "none",
+                      color: "inherit",
+                    }}
+                  >
+                    <Paper radius="lg" p="sm" shadow="sm">
+                      <Group justify="space-between" mb={8}>
+                        <Group gap="xs">
+                          <TransactionCategoryIcon
+                            icon={cat.categoryIcon}
+                            size={16}
+                          />
+                          <Text size="sm" fw={600}>
+                            {cat.categoryName}
+                          </Text>
+                          {isOverBudget && (
+                            <Text size="xs" c="red" fw={600}>
+                              Over budget
+                            </Text>
+                          )}
+                          {isNearBudget && (
+                            <Text size="xs" c="orange" fw={600}>
+                              Almost at budget
+                            </Text>
+                          )}
+                        </Group>
+                        <Stack gap={0} align="flex-end">
+                          <Text size="sm" fw={700}>
+                            {formatCurrency(cat.totalAmount, currency)}
+                          </Text>
+                          {cat.budget != null && (
+                            <Text size="xs" c="dimmed">
+                              of {formatCurrency(cat.budget, currency)}
+                            </Text>
+                          )}
+                        </Stack>
+                      </Group>
+                      <Progress value={barValue} color={barColor} size="sm" />
+                    </Paper>
+                  </Link>
+                </div>
               );
-            });
-          })()}
-        </Stack>
+            })}
+          </div>
+        </div>
       </Stack>
     </Box>
   );

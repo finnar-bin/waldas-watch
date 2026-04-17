@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import {
   Avatar,
   Box,
@@ -90,6 +91,14 @@ function CategoryTransactionsPage() {
     year,
     month,
   );
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useWindowVirtualizer({
+    count: transactions?.length ?? 0,
+    estimateSize: () => 88,
+    overscan: 3,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  });
 
   const budget = category?.budget ?? null;
   const totalAmount = useMemo(
@@ -208,93 +217,120 @@ function CategoryTransactionsPage() {
           </Center>
         )}
 
-        {transactions?.map((tx) => {
-          const date = new Date(tx.date + "T00:00:00");
-          const monthAbbr = MONTH_ABBR[date.getMonth()];
-          const day = date.getDate();
-          const creatorInitials = (
-            tx.creatorDisplayName ??
-            tx.creatorEmail ??
-            "?"
-          )
-            .split(" ")
-            .map((w) => w[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase();
+        <div ref={listRef}>
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const tx = transactions![virtualItem.index];
+              const date = new Date(tx.date + "T00:00:00");
+              const monthAbbr = MONTH_ABBR[date.getMonth()];
+              const day = date.getDate();
+              const creatorInitials = (
+                tx.creatorDisplayName ??
+                tx.creatorEmail ??
+                "?"
+              )
+                .split(" ")
+                .map((w) => w[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase();
 
-          return (
-            <Paper
-              key={tx.id}
-              radius="lg"
-              p="sm"
-              shadow="sm"
-              style={{ border: "none", cursor: "pointer" }}
-              onClick={() =>
-                navigate({
-                  to: "/sheets/$sheetId/overview/$categoryId/edit",
-                  params: { sheetId, categoryId },
-                  search: { transactionId: tx.id, year, month, type },
-                })
-              }
-            >
-              <Group align="center" gap="sm" wrap="nowrap">
-                <Stack
-                  align="center"
-                  justify="center"
-                  gap={0}
-                  style={{ minWidth: 32 }}
+              return (
+                <div
+                  key={virtualItem.key}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    paddingBottom: 16,
+                    transform: `translateY(${virtualItem.start - virtualizer.options.scrollMargin}px)`,
+                  }}
                 >
-                  <Text size="sm" c="dimmed" lh={1.2}>
-                    {monthAbbr}
-                  </Text>
-                  <Text size="xl" fw={700} lh={1.1}>
-                    {day}
-                  </Text>
-                </Stack>
+                  <Paper
+                    radius="lg"
+                    p="sm"
+                    shadow="sm"
+                    style={{ border: "none", cursor: "pointer" }}
+                    onClick={() =>
+                      navigate({
+                        to: "/sheets/$sheetId/overview/$categoryId/edit",
+                        params: { sheetId, categoryId },
+                        search: { transactionId: tx.id, year, month, type },
+                      })
+                    }
+                  >
+                    <Group align="center" gap="sm" wrap="nowrap">
+                      <Stack
+                        align="center"
+                        justify="center"
+                        gap={0}
+                        style={{ minWidth: 32 }}
+                      >
+                        <Text size="sm" c="dimmed" lh={1.2}>
+                          {monthAbbr}
+                        </Text>
+                        <Text size="xl" fw={700} lh={1.1}>
+                          {day}
+                        </Text>
+                      </Stack>
 
-                <Divider orientation="vertical" />
+                      <Divider orientation="vertical" />
 
-                <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-                  <Text size="sm" fw={600} lineClamp={2}>
-                    {tx.description ?? category?.name}
-                  </Text>
-                  {tx.paymentTypeName && (
-                    <Group gap={4} align="center">
-                      <Box style={{ display: "flex", alignItems: "center" }}>
-                        <TransactionCategoryIcon
-                          icon={tx.paymentTypeIcon}
-                          size={12}
-                          color="var(--mantine-color-dimmed)"
-                        />
-                      </Box>
-                      <Text size="xs" c="dimmed">
-                        {tx.paymentTypeName}
+                      <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+                        <Text size="sm" fw={600} lineClamp={2}>
+                          {tx.description ?? category?.name}
+                        </Text>
+                        {tx.paymentTypeName && (
+                          <Group gap={4} align="center">
+                            <Box
+                              style={{ display: "flex", alignItems: "center" }}
+                            >
+                              <TransactionCategoryIcon
+                                icon={tx.paymentTypeIcon}
+                                size={12}
+                                color="var(--mantine-color-dimmed)"
+                              />
+                            </Box>
+                            <Text size="xs" c="dimmed">
+                              {tx.paymentTypeName}
+                            </Text>
+                          </Group>
+                        )}
+                        <Group gap={4} mt={2}>
+                          <Avatar
+                            src={tx.creatorAvatarUrl}
+                            size={16}
+                            radius="xl"
+                            color="teal"
+                          >
+                            {creatorInitials}
+                          </Avatar>
+                          <Text size="xs" c="dimmed" truncate>
+                            {tx.creatorDisplayName ??
+                              tx.creatorEmail ??
+                              "Unknown"}
+                          </Text>
+                        </Group>
+                      </Stack>
+
+                      <Text size="md" fw={700} style={{ whiteSpace: "nowrap" }}>
+                        {formatCurrency(tx.amount, currency)}
                       </Text>
                     </Group>
-                  )}
-                  <Group gap={4} mt={2}>
-                    <Avatar
-                      src={tx.creatorAvatarUrl}
-                      size={16}
-                      radius="xl"
-                      color="teal"
-                    >
-                      {creatorInitials}
-                    </Avatar>
-                    <Text size="xs" c="dimmed" truncate>
-                      {tx.creatorDisplayName ?? tx.creatorEmail ?? "Unknown"}
-                    </Text>
-                  </Group>
-                </Stack>
-
-                <Text size="md" fw={700} style={{ whiteSpace: "nowrap" }}>
-                  {formatCurrency(tx.amount, currency)}
-                </Text>
-              </Group>
-            </Paper>
-          );
-        })}
+                  </Paper>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </Stack>
     </Box>
   );
