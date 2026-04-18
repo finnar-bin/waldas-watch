@@ -62,19 +62,6 @@ function RecurringTransactionsPage() {
             <Text size="sm" c="dimmed" mb="md">
               No recurring transactions yet.
             </Text>
-            <Button
-              size="sm"
-              color="teal"
-              leftSection={<Plus size={14} />}
-              onClick={() =>
-                navigate({
-                  to: "/sheets/$sheetId/settings/recurring-transactions/new",
-                  params: { sheetId },
-                })
-              }
-            >
-              Add one
-            </Button>
           </Box>
         ) : (
           <Paper radius="lg" shadow="sm" style={{ overflow: "hidden" }}>

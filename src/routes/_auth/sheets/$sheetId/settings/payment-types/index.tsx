@@ -53,19 +53,6 @@ function PaymentTypesPage() {
             <Text size="sm" c="dimmed" mb="md">
               No payment types yet.
             </Text>
-            <Button
-              size="sm"
-              color="teal"
-              leftSection={<Plus size={14} />}
-              onClick={() =>
-                navigate({
-                  to: "/sheets/$sheetId/settings/payment-types/new",
-                  params: { sheetId },
-                })
-              }
-            >
-              Add one
-            </Button>
           </Box>
         ) : (
           <Paper radius="lg" shadow="sm" style={{ overflow: "hidden" }}>

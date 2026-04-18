@@ -81,19 +81,6 @@ function CategoriesPage() {
             <Text size="sm" c="dimmed" mb="md">
               No {activeTab} categories yet.
             </Text>
-            <Button
-              size="sm"
-              color="teal"
-              leftSection={<Plus size={14} />}
-              onClick={() =>
-                navigate({
-                  to: "/sheets/$sheetId/settings/categories/new",
-                  params: { sheetId },
-                })
-              }
-            >
-              Add one
-            </Button>
           </Box>
         ) : (
           <Paper radius="lg" shadow="sm" style={{ overflow: "hidden" }}>
