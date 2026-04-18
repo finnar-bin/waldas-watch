@@ -363,6 +363,9 @@ verify_jwt = false
 [functions.create-sheet]
 verify_jwt = false
 
+[functions.process-recurring-transactions]
+verify_jwt = false
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

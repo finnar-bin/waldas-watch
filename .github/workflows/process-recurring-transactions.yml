@@ -1,0 +1,16 @@
+name: Process Recurring Transactions
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke edge function
+        run: |
+          curl --fail-with-body -X POST \
+            "${{ secrets.SUPABASE_URL }}/functions/v1/process-recurring-transactions" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
