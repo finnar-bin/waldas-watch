@@ -68,7 +68,7 @@ function NavItem({
 function AddButton({ sheetId }: { sheetId: string }) {
   return (
     <Link
-      to="/sheets/$sheetId/transaction-form"
+      to="/sheets/$sheetId/add-transaction"
       params={{ sheetId }}
       style={{
         textDecoration: "none",

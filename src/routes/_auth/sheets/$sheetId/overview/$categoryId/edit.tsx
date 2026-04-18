@@ -8,6 +8,7 @@ import {
   Group,
   Loader,
   Modal,
+  Paper,
   Stack,
   Text,
 } from "@mantine/core";
@@ -182,49 +183,51 @@ function EditTransactionPage() {
 
       <Box pb="md">
         <SheetHeader sheetName={sheetName} pageTitle="Edit Transaction" />
-        <form onSubmit={handleSubmit}>
-          <Stack gap="md" p="md">
-            <TransactionForm
-              form={form}
-              categories={categories ?? []}
-              paymentTypes={paymentTypes ?? []}
-              showTypeToggle={false}
-              disabled={mutation.isPending || deleteMutation.isPending}
-            />
-            {mutation.isError && (
-              <Text c="red" size="sm">
-                {mutation.error?.message ?? "Something went wrong."}
-              </Text>
-            )}
-            <Group grow mt="xs">
+        <Paper p="md" shadow="sm" radius="lg" m="md">
+          <form onSubmit={handleSubmit}>
+            <Stack gap="md">
+              <TransactionForm
+                form={form}
+                categories={categories ?? []}
+                paymentTypes={paymentTypes ?? []}
+                showTypeToggle={false}
+                disabled={mutation.isPending || deleteMutation.isPending}
+              />
+              {mutation.isError && (
+                <Text c="red" size="sm">
+                  {mutation.error?.message ?? "Something went wrong."}
+                </Text>
+              )}
+              <Group grow mt="xs">
+                <Button
+                  variant="default"
+                  onClick={handleCancel}
+                  disabled={mutation.isPending || deleteMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  color="teal"
+                  loading={mutation.isPending}
+                  disabled={deleteMutation.isPending}
+                >
+                  Save
+                </Button>
+              </Group>
+              <Divider />
               <Button
-                variant="default"
-                onClick={handleCancel}
+                variant="outline"
+                color="red"
+                leftSection={<Trash2 size={16} />}
+                onClick={openDeleteModal}
                 disabled={mutation.isPending || deleteMutation.isPending}
               >
-                Cancel
+                Delete transaction
               </Button>
-              <Button
-                type="submit"
-                color="teal"
-                loading={mutation.isPending}
-                disabled={deleteMutation.isPending}
-              >
-                Save
-              </Button>
-            </Group>
-            <Divider />
-            <Button
-              variant="outline"
-              color="red"
-              leftSection={<Trash2 size={16} />}
-              onClick={openDeleteModal}
-              disabled={mutation.isPending || deleteMutation.isPending}
-            >
-              Delete transaction
-            </Button>
-          </Stack>
-        </form>
+            </Stack>
+          </form>
+        </Paper>
       </Box>
     </>
   );

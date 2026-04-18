@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Box, Button, Group, Stack, Text } from "@mantine/core";
+import { Box, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { SheetHeader } from "@/components/SheetHeader";
 import { TransactionForm, FormValues } from "@/components/TransactionForm";
@@ -9,11 +9,9 @@ import { useSheetTransactionCategoriesQuery } from "@/queries/use-sheet-transact
 import { useSheetPaymentTypesQuery } from "@/queries/use-sheet-payment-types-query";
 import { useCreateSheetTransactionMutation } from "@/queries/use-create-sheet-transaction-mutation";
 
-export const Route = createFileRoute("/_auth/sheets/$sheetId/transaction-form")(
-  {
-    component: TransactionFormPage,
-  },
-);
+export const Route = createFileRoute("/_auth/sheets/$sheetId/add-transaction")({
+  component: TransactionFormPage,
+});
 
 function TransactionFormPage() {
   const { sheetId } = Route.useParams();
@@ -84,33 +82,35 @@ function TransactionFormPage() {
   return (
     <Box pb="md">
       <SheetHeader sheetName={sheetName} pageTitle="Add Transaction" />
-      <form onSubmit={handleSubmit}>
-        <Stack gap="md" p="md">
-          <TransactionForm
-            form={form}
-            categories={categories ?? []}
-            paymentTypes={paymentTypes ?? []}
-            disabled={mutation.isPending}
-          />
-          {mutation.isError && (
-            <Text c="red" size="sm">
-              {mutation.error?.message ?? "Something went wrong."}
-            </Text>
-          )}
-          <Group grow mt="xs">
-            <Button
-              variant="default"
-              onClick={handleCancel}
+      <Paper p="md" shadow="sm" radius="lg" m="md">
+        <form onSubmit={handleSubmit}>
+          <Stack gap="md">
+            <TransactionForm
+              form={form}
+              categories={categories ?? []}
+              paymentTypes={paymentTypes ?? []}
               disabled={mutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" color="teal" loading={mutation.isPending}>
-              Save
-            </Button>
-          </Group>
-        </Stack>
-      </form>
+            />
+            {mutation.isError && (
+              <Text c="red" size="sm">
+                {mutation.error?.message ?? "Something went wrong."}
+              </Text>
+            )}
+            <Group grow mt="xs">
+              <Button
+                variant="default"
+                onClick={handleCancel}
+                disabled={mutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" color="teal" loading={mutation.isPending}>
+                Save
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Paper>
     </Box>
   );
 }

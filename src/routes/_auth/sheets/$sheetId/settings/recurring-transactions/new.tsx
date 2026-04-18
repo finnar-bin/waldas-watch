@@ -5,6 +5,7 @@ import {
   Button,
   NumberInput,
   Paper,
+  SegmentedControl,
   Select,
   Stack,
   Textarea,
@@ -126,16 +127,15 @@ function NewRecurringPage() {
       <Paper p="md" shadow="sm" radius="lg" m="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="sm">
-            <Select
-              label="Type"
-              data={[
-                { value: "expense", label: "Expense" },
-                { value: "income", label: "Income" },
-              ]}
-              allowDeselect={false}
+            <SegmentedControl
+              fullWidth
               value={form.values.type}
               onChange={(v) => handleTypeChange(v as "income" | "expense")}
-              error={form.errors.type}
+              data={[
+                { label: "Expense", value: "expense" },
+                { label: "Income", value: "income" },
+              ]}
+              color="teal"
             />
             <IconCombobox
               label="Category"
@@ -148,6 +148,13 @@ function NewRecurringPage() {
               value={form.values.categoryId || null}
               onChange={(v) => form.setFieldValue("categoryId", v ?? "")}
               error={form.errors.categoryId}
+            />
+            <NumberInput
+              label="Amount"
+              placeholder="0.00"
+              min={0.01}
+              decimalScale={2}
+              {...form.getInputProps("amount")}
             />
             {form.values.type === "expense" && (
               <IconCombobox
@@ -163,13 +170,6 @@ function NewRecurringPage() {
                 error={form.errors.paymentTypeId}
               />
             )}
-            <NumberInput
-              label="Amount"
-              placeholder="0.00"
-              min={0.01}
-              decimalScale={2}
-              {...form.getInputProps("amount")}
-            />
             <Select
               label="Frequency"
               data={FREQUENCY_OPTIONS}
