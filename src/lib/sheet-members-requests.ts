@@ -1,129 +1,179 @@
-import { supabase } from './supabase-client'
+import { supabase } from "./supabase-client";
 
 export type SheetMember = {
-  id: string
-  userId: string
-  role: 'viewer' | 'editor' | 'admin'
-  displayName: string | null
-  email: string | null
-  avatarUrl: string | null
-}
+  id: string;
+  userId: string;
+  role: "viewer" | "editor" | "admin";
+  displayName: string | null;
+  email: string | null;
+  avatarUrl: string | null;
+};
 
 export type SheetInvite = {
-  id: string
-  invitedEmail: string
-  role: 'viewer' | 'editor' | 'admin'
-  expiresAt: string
-}
+  id: string;
+  invitedEmail: string;
+  role: "viewer" | "editor" | "admin";
+  expiresAt: string;
+};
 
 export type InviteUserInput = {
-  sheetId: string
-  invitedEmail: string
-  role: 'viewer' | 'editor' | 'admin'
-  invitedBy: string
-}
+  sheetId: string;
+  invitedEmail: string;
+  role: "viewer" | "editor" | "admin";
+  invitedBy: string;
+};
 
 export type InviteResult = {
-  inviteUrl: string
-}
+  inviteUrl: string;
+};
 
 async function hashToken(token: string): Promise<string> {
-  const encoded = new TextEncoder().encode(token)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded)
+  const encoded = new TextEncoder().encode(token);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
   return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export async function getSheetMembers(sheetId: string): Promise<SheetMember[]> {
   const { data: sheetUsers, error: sheetUsersError } = await supabase
-    .from('sheet_users')
-    .select('id, user_id, role')
-    .eq('sheet_id', sheetId)
-    .order('created_at', { ascending: true })
+    .from("sheet_users")
+    .select("id, user_id, role")
+    .eq("sheet_id", sheetId)
+    .order("created_at", { ascending: true });
 
-  if (sheetUsersError) throw sheetUsersError
-  if (!sheetUsers?.length) return []
+  if (sheetUsersError) throw sheetUsersError;
+  if (!sheetUsers?.length) return [];
 
-  const userIds = sheetUsers.map((u) => u.user_id)
+  const userIds = sheetUsers.map((u) => u.user_id);
 
   const { data: profiles, error: profilesError } = await supabase
-    .from('profiles')
-    .select('id, display_name, email, avatar_url')
-    .in('id', userIds)
+    .from("profiles")
+    .select("id, display_name, email, avatar_url")
+    .in("id", userIds);
 
-  if (profilesError) throw profilesError
+  if (profilesError) throw profilesError;
 
-  type ProfileRow = { id: string; display_name: string | null; email: string | null; avatar_url: string | null }
+  type ProfileRow = {
+    id: string;
+    display_name: string | null;
+    email: string | null;
+    avatar_url: string | null;
+  };
   const profileMap = new Map(
     (profiles ?? []).map((p) => [p.id, p as ProfileRow]),
-  )
+  );
 
   return sheetUsers.map((row) => {
-    const profile = profileMap.get(row.user_id)
+    const profile = profileMap.get(row.user_id);
     return {
       id: row.id,
       userId: row.user_id,
-      role: row.role as SheetMember['role'],
+      role: row.role as SheetMember["role"],
       displayName: profile?.display_name ?? null,
       email: profile?.email ?? null,
       avatarUrl: profile?.avatar_url ?? null,
-    }
-  })
+    };
+  });
 }
 
 export async function getSheetInvites(sheetId: string): Promise<SheetInvite[]> {
   const { data, error } = await supabase
-    .from('sheet_invites')
-    .select('id, invited_email, role, expires_at')
-    .eq('sheet_id', sheetId)
-    .eq('status', 'pending')
-    .order('expires_at', { ascending: true })
+    .from("sheet_invites")
+    .select("id, invited_email, role, expires_at")
+    .eq("sheet_id", sheetId)
+    .eq("status", "pending")
+    .order("expires_at", { ascending: true });
 
-  if (error) throw error
+  if (error) throw error;
 
   return (data ?? []).map((row) => ({
     id: row.id,
     invitedEmail: row.invited_email,
-    role: row.role as SheetInvite['role'],
+    role: row.role as SheetInvite["role"],
     expiresAt: row.expires_at,
-  }))
+  }));
 }
 
-export async function inviteUser(input: InviteUserInput): Promise<InviteResult> {
-  const token = crypto.randomUUID()
-  const tokenHash = await hashToken(token)
+export async function inviteUser(
+  input: InviteUserInput,
+): Promise<InviteResult> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", input.invitedEmail)
+    .maybeSingle();
 
-  const expiresAt = new Date()
-  expiresAt.setDate(expiresAt.getDate() + 7)
+  if (profile) {
+    const { data: existingMember } = await supabase
+      .from("sheet_users")
+      .select("id")
+      .eq("sheet_id", input.sheetId)
+      .eq("user_id", profile.id)
+      .maybeSingle();
 
-  const { error } = await supabase.from('sheet_invites').insert({
-    sheet_id: input.sheetId,
-    invited_email: input.invitedEmail,
-    role: input.role,
-    token_hash: tokenHash,
-    status: 'pending',
-    invited_by: input.invitedBy,
-    expires_at: expiresAt.toISOString(),
-  })
+    if (existingMember)
+      throw new Error("This user is already a member of this sheet.");
+  }
 
-  if (error) throw error
+  const { data: pendingInvite } = await supabase
+    .from("sheet_invites")
+    .select("id")
+    .eq("sheet_id", input.sheetId)
+    .eq("invited_email", input.invitedEmail)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  const token = crypto.randomUUID();
+  const tokenHash = await hashToken(token);
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  if (pendingInvite) {
+    const { error } = await supabase
+      .from("sheet_invites")
+      .update({
+        role: input.role,
+        token_hash: tokenHash,
+        expires_at: expiresAt.toISOString(),
+        invited_by: input.invitedBy,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", pendingInvite.id);
+
+    if (error) throw error;
+  } else {
+    const { error } = await supabase.from("sheet_invites").insert({
+      sheet_id: input.sheetId,
+      invited_email: input.invitedEmail,
+      role: input.role,
+      token_hash: tokenHash,
+      status: "pending",
+      invited_by: input.invitedBy,
+      expires_at: expiresAt.toISOString(),
+    });
+
+    if (error) throw error;
+  }
 
   return {
-    inviteUrl: `${window.location.origin}/invite?token=${token}`,
-  }
+    inviteUrl: `${window.location.origin}/invite/${token}`,
+  };
 }
 
 export async function revokeInvite(inviteId: string): Promise<void> {
   const { error } = await supabase
-    .from('sheet_invites')
-    .update({ status: 'revoked' })
-    .eq('id', inviteId)
+    .from("sheet_invites")
+    .update({ status: "revoked" })
+    .eq("id", inviteId);
 
-  if (error) throw error
+  if (error) throw error;
 }
 
 export async function removeSheetMember(sheetUserId: string): Promise<void> {
-  const { error } = await supabase.from('sheet_users').delete().eq('id', sheetUserId)
-  if (error) throw error
+  const { error } = await supabase
+    .from("sheet_users")
+    .delete()
+    .eq("id", sheetUserId);
+  if (error) throw error;
 }

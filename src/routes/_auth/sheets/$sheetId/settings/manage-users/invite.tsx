@@ -47,13 +47,18 @@ function InviteUserPage() {
   });
 
   async function handleSubmit(values: FormValues) {
-    const result = await inviteMutation.mutateAsync({
-      sheetId,
-      invitedEmail: values.email.trim(),
-      role: values.role,
-      invitedBy: session!.user.id,
-    });
-    setInviteLink(result.inviteUrl);
+    try {
+      const result = await inviteMutation.mutateAsync({
+        sheetId,
+        invitedEmail: values.email.trim(),
+        role: values.role,
+        invitedBy: session!.user.id,
+      });
+      setInviteLink(result.inviteUrl);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to send invite.";
+      form.setFieldError("email", message);
+    }
   }
 
   const backLink = (
