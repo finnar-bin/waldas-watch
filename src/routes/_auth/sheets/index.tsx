@@ -11,11 +11,13 @@ import {
   Text,
   Title,
   UnstyledButton,
+  Badge,
 } from "@mantine/core";
 import { ChevronRight, LogOut, Plus } from "lucide-react";
 import { signOut } from "@/lib/auth-requests";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
+import { ROLE_COLORS } from "@/lib/constants/role-colors";
 
 export const Route = createFileRoute("/_auth/sheets/")({
   component: SheetsPage,
@@ -109,15 +111,13 @@ function SheetsPage() {
               >
                 <Flex align="center" gap="sm">
                   <Box flex={1}>
-                    <Text
-                      size="xs"
-                      c="teal.9"
-                      tt="uppercase"
-                      lts="2px"
-                      fw={600}
+                    <Badge
+                      size="sm"
+                      color={ROLE_COLORS[sheet.role]}
+                      variant="light"
                     >
                       {sheet.role}
-                    </Text>
+                    </Badge>
                     <Text fw={800}>{sheet.name}</Text>
                     {sheet.description && (
                       <Text size="xs" c="dimmed">
