@@ -21,21 +21,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Missing tokenHash" }, { status: 400, headers: corsHeaders });
     }
 
-    const userClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-
-    const { data: { user }, error: authError } = await userClient.auth.getUser();
-    if (authError || !user) {
-      return Response.json({ error: "Unauthorized" }, { status: 401, headers: corsHeaders });
-    }
-
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await admin.auth.getUser(token);
+    if (authError || !user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401, headers: corsHeaders });
+    }
 
     const { data: invite, error: inviteError } = await admin
       .from("sheet_invites")

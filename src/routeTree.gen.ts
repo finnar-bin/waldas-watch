@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as InviteTokenHashRouteImport } from './routes/invite/$tokenHash'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthSheetsIndexRouteImport } from './routes/_auth/sheets/index'
+import { Route as AuthSheetsNewRouteImport } from './routes/_auth/sheets/new'
 import { Route as AuthSheetsSheetIdRouteImport } from './routes/_auth/sheets/$sheetId'
 import { Route as AuthSheetsSheetIdIndexRouteImport } from './routes/_auth/sheets/$sheetId/index'
 import { Route as AuthSheetsSheetIdSettingsRouteImport } from './routes/_auth/sheets/$sheetId/settings'
@@ -69,6 +70,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const AuthSheetsIndexRoute = AuthSheetsIndexRouteImport.update({
   id: '/sheets/',
   path: '/sheets/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSheetsNewRoute = AuthSheetsNewRouteImport.update({
+  id: '/sheets/new',
+  path: '/sheets/new',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSheetsSheetIdRoute = AuthSheetsSheetIdRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/invite/$tokenHash': typeof InviteTokenHashRoute
   '/sheets/$sheetId': typeof AuthSheetsSheetIdRouteWithChildren
+  '/sheets/new': typeof AuthSheetsNewRoute
   '/sheets/': typeof AuthSheetsIndexRoute
   '/sheets/$sheetId/add-transaction': typeof AuthSheetsSheetIdAddTransactionRoute
   '/sheets/$sheetId/settings': typeof AuthSheetsSheetIdSettingsRouteWithChildren
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/invite/$tokenHash': typeof InviteTokenHashRoute
+  '/sheets/new': typeof AuthSheetsNewRoute
   '/sheets': typeof AuthSheetsIndexRoute
   '/sheets/$sheetId/add-transaction': typeof AuthSheetsSheetIdAddTransactionRoute
   '/sheets/$sheetId': typeof AuthSheetsSheetIdIndexRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/invite/$tokenHash': typeof InviteTokenHashRoute
   '/_auth/sheets/$sheetId': typeof AuthSheetsSheetIdRouteWithChildren
+  '/_auth/sheets/new': typeof AuthSheetsNewRoute
   '/_auth/sheets/': typeof AuthSheetsIndexRoute
   '/_auth/sheets/$sheetId/add-transaction': typeof AuthSheetsSheetIdAddTransactionRoute
   '/_auth/sheets/$sheetId/settings': typeof AuthSheetsSheetIdSettingsRouteWithChildren
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/invite/$tokenHash'
     | '/sheets/$sheetId'
+    | '/sheets/new'
     | '/sheets/'
     | '/sheets/$sheetId/add-transaction'
     | '/sheets/$sheetId/settings'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/auth/callback'
     | '/invite/$tokenHash'
+    | '/sheets/new'
     | '/sheets'
     | '/sheets/$sheetId/add-transaction'
     | '/sheets/$sheetId'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/invite/$tokenHash'
     | '/_auth/sheets/$sheetId'
+    | '/_auth/sheets/new'
     | '/_auth/sheets/'
     | '/_auth/sheets/$sheetId/add-transaction'
     | '/_auth/sheets/$sheetId/settings'
@@ -418,6 +430,13 @@ declare module '@tanstack/react-router' {
       path: '/sheets'
       fullPath: '/sheets/'
       preLoaderRoute: typeof AuthSheetsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/sheets/new': {
+      id: '/_auth/sheets/new'
+      path: '/sheets/new'
+      fullPath: '/sheets/new'
+      preLoaderRoute: typeof AuthSheetsNewRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/sheets/$sheetId': {
@@ -638,11 +657,13 @@ const AuthSheetsSheetIdRouteWithChildren =
 
 interface AuthRouteChildren {
   AuthSheetsSheetIdRoute: typeof AuthSheetsSheetIdRouteWithChildren
+  AuthSheetsNewRoute: typeof AuthSheetsNewRoute
   AuthSheetsIndexRoute: typeof AuthSheetsIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthSheetsSheetIdRoute: AuthSheetsSheetIdRouteWithChildren,
+  AuthSheetsNewRoute: AuthSheetsNewRoute,
   AuthSheetsIndexRoute: AuthSheetsIndexRoute,
 }
 

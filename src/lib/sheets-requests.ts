@@ -7,9 +7,23 @@ export type UserSheet = {
   role: 'viewer' | 'editor' | 'admin'
 }
 
+export interface CreateSheetInput {
+  name: string
+  description: string | null
+  currency: string
+}
+
 export interface UpdateSheetInput {
   name: string
   description: string | null
+}
+
+export async function createSheet(input: CreateSheetInput): Promise<string> {
+  const { data, error } = await supabase.functions.invoke('create-sheet', {
+    body: { name: input.name, description: input.description, currency: input.currency },
+  })
+  if (error) throw error
+  return data.sheetId
 }
 
 export async function deleteSheet(sheetId: string): Promise<void> {

@@ -83,6 +83,7 @@ function SheetsPage() {
           radius="md"
           size="md"
           leftSection={<Plus size={18} />}
+          onClick={() => navigate({ to: "/sheets/new" })}
         >
           New Sheet
         </Button>
