@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useForm } from "@mantine/form";
-import { Box, Button, Select, Stack, Text, TextInput } from "@mantine/core";
+import { Box, Button, Paper, Select, Stack, Text, TextInput } from "@mantine/core";
 import { SheetHeader } from "@/components/SheetHeader";
 import { BackLink } from "@/components/BackLink";
 import { useSession } from "@/providers/SessionProvider";
@@ -102,29 +102,31 @@ function InviteUserPage() {
       <SheetHeader sheetName={sheetName} pageTitle="Invite Someone" />
       {backLink}
       <Box p="md">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="sm">
-            <TextInput
-              label="Email"
-              placeholder="name@example.com"
-              {...form.getInputProps("email")}
-            />
-            <Select
-              label="Role"
-              data={ROLE_OPTIONS}
-              allowDeselect={false}
-              {...form.getInputProps("role")}
-            />
-            <Button
-              type="submit"
-              color="teal"
-              loading={inviteMutation.isPending}
-              mt="xs"
-            >
-              Send invite
-            </Button>
-          </Stack>
-        </form>
+        <Paper shadow="sm" radius="lg" p="md">
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="sm">
+              <TextInput
+                label="Email"
+                placeholder="name@example.com"
+                {...form.getInputProps("email")}
+              />
+              <Select
+                label="Role"
+                data={ROLE_OPTIONS}
+                allowDeselect={false}
+                {...form.getInputProps("role")}
+              />
+              <Button
+                type="submit"
+                color="teal"
+                loading={inviteMutation.isPending}
+                mt="xs"
+              >
+                Send invite
+              </Button>
+            </Stack>
+          </form>
+        </Paper>
       </Box>
     </Box>
   );
