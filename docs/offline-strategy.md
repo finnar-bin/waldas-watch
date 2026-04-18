@@ -79,13 +79,13 @@ Offline support applies to:
 
 ## Phase Schedule
 
-- **Phase 1 (Active now)**:
-  - Implement immediately while auth and core app shell are being built.
+- **Phase 1 (Complete)**:
+  - Implemented during auth and core app shell build.
   - Scope: read-only offline foundation only (cache persistence + offline indicators).
-- **Phase 2 (After core CRUD flows are stable)**:
-  - Start only after transactions, budgets, and categories CRUD screens are functionally stable.
-  - Scope: offline mutation queue and replay.
-- **Phase 3 (After production usage feedback)**:
+- **Phase 2 (Complete)**:
+  - Implemented after CRUD flows were stable.
+  - Scope: offline mutation queue and replay for transactions, categories, payment types, recurring transactions, and sheet settings. Excluded: sheet create/delete and sheet member operations (auth/email flows).
+- **Phase 3 (Not started — awaiting production usage feedback)**:
   - Start after real usage reveals conflict/error patterns.
   - Scope: conflict handling hardening and sync diagnostics.
 
