@@ -8,11 +8,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "db:link:dev": "dotenv -e .env.development -- supabase link --project-ref $SUPABASE_PROJECT_REF_DEV",
-    "db:link:prod": "dotenv -e .env.production -- supabase link --project-ref $SUPABASE_PROJECT_REF_PROD",
-    "db:push:dev": "dotenv -e .env.development -- supabase db push",
-    "db:push:prod": "dotenv -e .env.production -- supabase db push",
-    "db:list": "supabase migration list"
+    "db:link:dev": "dotenv -e .env.development -- sh -c 'npx supabase link --project-ref $SUPABASE_PROJECT_REF_DEV'",
+    "db:link:prod": "dotenv -e .env.production -- sh -c 'npx supabase link --project-ref $SUPABASE_PROJECT_REF_PROD'",
+    "db:push:dev": "dotenv -e .env.development -- sh -c 'npx supabase db push'",
+    "db:push:prod": "dotenv -e .env.production -- sh -c 'npx supabase db push'",
+    "db:list": "npx supabase migration list",
+    "functions:deploy:dev": "dotenv -e .env.development -- sh -c 'npx supabase functions deploy --project-ref $SUPABASE_PROJECT_REF_DEV'",
+    "functions:deploy:prod": "dotenv -e .env.production -- sh -c 'npx supabase functions deploy --project-ref $SUPABASE_PROJECT_REF_PROD'"
   },
   "dependencies": {
     "@mantine/core": "^7.14.0",

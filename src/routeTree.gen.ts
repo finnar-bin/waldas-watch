@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InviteTokenHashRouteImport } from './routes/invite/$tokenHash'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthSheetsIndexRouteImport } from './routes/_auth/sheets/index'
 import { Route as AuthSheetsSheetIdRouteImport } from './routes/_auth/sheets/$sheetId'
@@ -53,6 +54,11 @@ const AuthRoute = AuthRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenHashRoute = InviteTokenHashRouteImport.update({
+  id: '/invite/$tokenHash',
+  path: '/invite/$tokenHash',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/invite/$tokenHash': typeof InviteTokenHashRoute
   '/sheets/$sheetId': typeof AuthSheetsSheetIdRouteWithChildren
   '/sheets/': typeof AuthSheetsIndexRoute
   '/sheets/$sheetId/add-transaction': typeof AuthSheetsSheetIdAddTransactionRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/invite/$tokenHash': typeof InviteTokenHashRoute
   '/sheets': typeof AuthSheetsIndexRoute
   '/sheets/$sheetId/add-transaction': typeof AuthSheetsSheetIdAddTransactionRoute
   '/sheets/$sheetId': typeof AuthSheetsSheetIdIndexRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/invite/$tokenHash': typeof InviteTokenHashRoute
   '/_auth/sheets/$sheetId': typeof AuthSheetsSheetIdRouteWithChildren
   '/_auth/sheets/': typeof AuthSheetsIndexRoute
   '/_auth/sheets/$sheetId/add-transaction': typeof AuthSheetsSheetIdAddTransactionRoute
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/auth/callback'
+    | '/invite/$tokenHash'
     | '/sheets/$sheetId'
     | '/sheets/'
     | '/sheets/$sheetId/add-transaction'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/auth/callback'
+    | '/invite/$tokenHash'
     | '/sheets'
     | '/sheets/$sheetId/add-transaction'
     | '/sheets/$sheetId'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/auth/callback'
+    | '/invite/$tokenHash'
     | '/_auth/sheets/$sheetId'
     | '/_auth/sheets/'
     | '/_auth/sheets/$sheetId/add-transaction'
@@ -354,6 +366,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  InviteTokenHashRoute: typeof InviteTokenHashRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$tokenHash': {
+      id: '/invite/$tokenHash'
+      path: '/invite/$tokenHash'
+      fullPath: '/invite/$tokenHash'
+      preLoaderRoute: typeof InviteTokenHashRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -634,6 +654,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  InviteTokenHashRoute: InviteTokenHashRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

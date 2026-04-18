@@ -14,6 +14,7 @@ export type SheetInvite = {
   invitedEmail: string;
   role: "viewer" | "editor" | "admin";
   expiresAt: string;
+  tokenHash: string;
 };
 
 export type InviteUserInput = {
@@ -80,7 +81,7 @@ export async function getSheetMembers(sheetId: string): Promise<SheetMember[]> {
 export async function getSheetInvites(sheetId: string): Promise<SheetInvite[]> {
   const { data, error } = await supabase
     .from("sheet_invites")
-    .select("id, invited_email, role, expires_at")
+    .select("id, invited_email, role, expires_at, token_hash")
     .eq("sheet_id", sheetId)
     .eq("status", "pending")
     .order("expires_at", { ascending: true });
@@ -92,6 +93,7 @@ export async function getSheetInvites(sheetId: string): Promise<SheetInvite[]> {
     invitedEmail: row.invited_email,
     role: row.role as SheetInvite["role"],
     expiresAt: row.expires_at,
+    tokenHash: row.token_hash,
   }));
 }
 
@@ -124,8 +126,7 @@ export async function inviteUser(
     .eq("status", "pending")
     .maybeSingle();
 
-  const token = crypto.randomUUID();
-  const tokenHash = await hashToken(token);
+  const tokenHash = await hashToken(crypto.randomUUID());
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7);
 
@@ -157,8 +158,38 @@ export async function inviteUser(
   }
 
   return {
-    inviteUrl: `${window.location.origin}/invite/${token}`,
+    inviteUrl: `${window.location.origin}/invite/${tokenHash}`,
   };
+}
+
+export type InviteDetail = {
+  id: string;
+  sheetId: string;
+  sheetName: string;
+  invitedEmail: string;
+  role: "viewer" | "editor" | "admin";
+  status: "pending" | "accepted" | "declined" | "revoked" | "expired";
+  expiresAt: string;
+};
+
+export async function getInviteByToken(
+  tokenHash: string,
+): Promise<InviteDetail | null> {
+  const { data, error } = await supabase.functions.invoke<InviteDetail | null>(
+    "get-invite",
+    { body: { tokenHash } },
+  );
+  if (error) throw error;
+  return data;
+}
+
+export async function acceptInvite(tokenHash: string): Promise<{ sheetId: string }> {
+  const { data, error } = await supabase.functions.invoke<{ sheetId: string }>(
+    "accept-invite",
+    { body: { tokenHash } },
+  );
+  if (error) throw error;
+  return data!;
 }
 
 export async function revokeInvite(inviteId: string): Promise<void> {

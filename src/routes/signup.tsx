@@ -18,12 +18,16 @@ import { useSession } from "@/providers/SessionProvider";
 import { BadgeCheck, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirectTo: typeof search.redirectTo === "string" ? search.redirectTo : undefined,
+  }),
   component: SignupPage,
 });
 
 function SignupPage() {
   const { session, isLoading } = useSession();
   const navigate = useNavigate();
+  const { redirectTo } = Route.useSearch();
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -41,9 +45,9 @@ function SignupPage() {
 
   useEffect(() => {
     if (!isLoading && session) {
-      navigate({ to: "/sheets", replace: true });
+      navigate({ to: redirectTo ?? "/sheets", replace: true });
     }
-  }, [session, isLoading, navigate]);
+  }, [session, isLoading, navigate, redirectTo]);
 
   async function handleSubmit(values: {
     displayName: string;
@@ -134,7 +138,7 @@ function SignupPage() {
 
           <Text ta="center" size="sm">
             Miss us already?{" "}
-            <Anchor component={Link} to="/login" c="teal">
+            <Anchor component={Link} to="/login" search={{ redirectTo }} c="teal">
               Sign in.
             </Anchor>
           </Text>

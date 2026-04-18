@@ -19,12 +19,16 @@ import { useSession } from "@/providers/SessionProvider";
 import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirectTo: typeof search.redirectTo === "string" ? search.redirectTo : undefined,
+  }),
   component: LoginPage,
 });
 
 function LoginPage() {
   const { session, isLoading } = useSession();
   const navigate = useNavigate();
+  const { redirectTo } = Route.useSearch();
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,9 +45,9 @@ function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && session) {
-      navigate({ to: "/sheets", replace: true });
+      navigate({ to: redirectTo ?? "/sheets", replace: true });
     }
-  }, [session, isLoading, navigate]);
+  }, [session, isLoading, navigate, redirectTo]);
 
   async function handleSubmit(values: { email: string; password: string }) {
     setError(null);
@@ -133,7 +137,7 @@ function LoginPage() {
 
           <Text ta="center" size="sm">
             Still spending blind?{" "}
-            <Anchor component={Link} to="/signup" c="teal">
+            <Anchor component={Link} to="/signup" search={{ redirectTo }} c="teal">
               Sign up.
             </Anchor>
           </Text>

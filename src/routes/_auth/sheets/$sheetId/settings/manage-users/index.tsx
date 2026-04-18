@@ -12,7 +12,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { UserPlus, X } from "lucide-react";
+import { Check, Copy, UserPlus, X } from "lucide-react";
 import { SheetHeader } from "@/components/SheetHeader";
 import { BackLink } from "@/components/BackLink";
 import { useSession } from "@/providers/SessionProvider";
@@ -47,7 +47,9 @@ function ManageUsersPage() {
   const revokeMutation = useRevokeInviteMutation(sheetId);
   const removeMutation = useRemoveSheetMemberMutation(sheetId);
 
+  const [copiedInviteId, setCopiedInviteId] = useState<string | null>(null);
   const [removeTarget, setRemoveTarget] = useState<SheetMember | null>(null);
+
   const [removeOpened, { open: openRemove, close: closeRemove }] =
     useDisclosure(false);
 
@@ -63,6 +65,13 @@ function ManageUsersPage() {
 
   function handleRevoke(invite: SheetInvite) {
     revokeMutation.mutate(invite.id);
+  }
+
+  async function handleCopyLink(invite: SheetInvite) {
+    const url = `${window.location.origin}/invite/${invite.tokenHash}`;
+    await navigator.clipboard.writeText(url);
+    setCopiedInviteId(invite.id);
+    setTimeout(() => setCopiedInviteId(null), 2000);
   }
 
   const adminCount = members.filter((m) => m.role === "admin").length;
@@ -169,18 +178,29 @@ function ManageUsersPage() {
                         </Text>
                       </Group>
                     </div>
-                    {isAdmin && (
+                    <Group gap={4}>
                       <Button
                         size="xs"
                         variant="subtle"
-                        color="red"
-                        leftSection={<X size={12} />}
-                        loading={revokeMutation.isPending}
-                        onClick={() => handleRevoke(invite)}
+                        color={copiedInviteId === invite.id ? "teal" : "gray"}
+                        leftSection={copiedInviteId === invite.id ? <Check size={12} /> : <Copy size={12} />}
+                        onClick={() => handleCopyLink(invite)}
                       >
-                        Revoke
+                        {copiedInviteId === invite.id ? "Copied!" : "Copy link"}
                       </Button>
-                    )}
+                      {isAdmin && (
+                        <Button
+                          size="xs"
+                          variant="subtle"
+                          color="red"
+                          leftSection={<X size={12} />}
+                          loading={revokeMutation.isPending}
+                          onClick={() => handleRevoke(invite)}
+                        >
+                          Revoke
+                        </Button>
+                      )}
+                    </Group>
                   </Group>
                 ))}
               </Paper>
