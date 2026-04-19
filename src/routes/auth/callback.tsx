@@ -15,7 +15,7 @@ function AuthCallbackPage() {
       if (data.session) {
         navigate({ to: '/sheets', replace: true })
       } else {
-        navigate({ to: '/login', replace: true })
+        navigate({ to: '/login', replace: true, search: { redirectTo: undefined } })
       }
     })
   }, [navigate])

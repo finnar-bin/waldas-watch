@@ -77,7 +77,7 @@ function LoginPage() {
       <Box w="100%" maw={400}>
         <Stack gap="xl">
           <Stack gap={4} align="center">
-            <img src="/favicon.svg" alt="Waldas Watch" width={64} height={64} />
+            <img src="/favicon.png" alt="Waldas Watch" width={64} height={64} />
             <Title order={1} size="h2">
               Waldas Watch
             </Title>

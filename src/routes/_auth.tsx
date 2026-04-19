@@ -13,7 +13,7 @@ function AuthGuard() {
 
   useEffect(() => {
     if (!isLoading && !session) {
-      navigate({ to: '/login', replace: true })
+      navigate({ to: '/login', replace: true, search: { redirectTo: undefined } })
     }
   }, [session, isLoading, navigate])
 

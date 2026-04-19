@@ -13,7 +13,7 @@ export function SheetHeader({ sheetName, pageTitle }: SheetHeaderProps) {
 
   async function handleSignOut() {
     await signOut();
-    navigate({ to: "/login", replace: true });
+    navigate({ to: "/login", replace: true, search: { redirectTo: undefined } });
   }
 
   return (

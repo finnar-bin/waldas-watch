@@ -16,7 +16,7 @@ function IndexPage() {
     if (session) {
       navigate({ to: '/sheets', replace: true })
     } else {
-      navigate({ to: '/login', replace: true })
+      navigate({ to: '/login', replace: true, search: { redirectTo: undefined } })
     }
   }, [session, isLoading, navigate])
 

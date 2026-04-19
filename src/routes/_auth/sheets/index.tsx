@@ -45,7 +45,7 @@ function SheetsPage() {
 
   async function handleSignOut() {
     await signOut();
-    navigate({ to: "/login", replace: true });
+    navigate({ to: "/login", replace: true, search: { redirectTo: undefined } });
   }
 
   async function handleAccept(tokenHash: string) {
