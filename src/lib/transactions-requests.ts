@@ -111,6 +111,7 @@ export type RecentSheetTransaction = {
 export type MonthlySheetTotals = {
   incomeTotal: number
   expenseTotal: number
+  exceededBudgetTotal: number
 }
 
 export type MonthlyCategoryTotal = {
@@ -189,14 +190,24 @@ export async function getCurrentMonthSheetTotals(
     .toISOString()
     .slice(0, 10)
 
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('amount, type')
-    .eq('sheet_id', sheetId)
-    .gte('date', monthStart)
-    .lte('date', monthEnd)
+  const [{ data, error }, { data: categories, error: categoriesError }] =
+    await Promise.all([
+      supabase
+        .from('transactions')
+        .select('amount, type, category_id')
+        .eq('sheet_id', sheetId)
+        .gte('date', monthStart)
+        .lte('date', monthEnd),
+      supabase
+        .from('categories')
+        .select('id, budget')
+        .eq('sheet_id', sheetId)
+        .eq('type', 'expense')
+        .gt('budget', 0),
+    ])
 
   if (error) throw error
+  if (categoriesError) throw categoriesError
 
   const rows = data ?? []
   const incomeTotal = rows
@@ -206,7 +217,23 @@ export async function getCurrentMonthSheetTotals(
     .filter((r) => r.type === 'expense')
     .reduce((sum, r) => sum + Number(r.amount), 0)
 
-  return { incomeTotal, expenseTotal }
+  const budgetMap = new Map(
+    (categories ?? []).map((c) => [c.id, Number(c.budget)])
+  )
+  const spentByCategory = new Map<string, number>()
+  for (const row of rows.filter((r) => r.type === 'expense')) {
+    spentByCategory.set(
+      row.category_id,
+      (spentByCategory.get(row.category_id) ?? 0) + Number(row.amount)
+    )
+  }
+  let exceededBudgetTotal = 0
+  for (const [categoryId, budget] of budgetMap) {
+    const spent = spentByCategory.get(categoryId) ?? 0
+    if (spent > budget) exceededBudgetTotal += spent - budget
+  }
+
+  return { incomeTotal, expenseTotal, exceededBudgetTotal }
 }
 
 export async function getCurrentMonthSheetCategoryTotals(

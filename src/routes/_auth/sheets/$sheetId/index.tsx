@@ -137,6 +137,27 @@ function SheetHomePage() {
                 </Text>
               </Stack>
             </Group>
+
+            {(totals?.exceededBudgetTotal ?? 0) > 0 && (
+              <Box
+                px="sm"
+                py={6}
+                style={{
+                  background: "rgba(255, 80, 80, 0.15)",
+                  borderRadius: "var(--mantine-radius-md)",
+                  border: "1px solid rgba(255, 80, 80, 0.3)",
+                }}
+              >
+                <Group justify="space-between">
+                  <Text size="xs" style={{ opacity: 0.85 }}>
+                    Over budget
+                  </Text>
+                  <Text size="xs" fw={700} c="red.4">
+                    {formatCurrency(totals!.exceededBudgetTotal, currency)}
+                  </Text>
+                </Group>
+              </Box>
+            )}
           </Stack>
         )}
       </Box>
