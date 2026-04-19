@@ -208,3 +208,48 @@ export async function removeSheetMember(sheetUserId: string): Promise<void> {
     .eq("id", sheetUserId);
   if (error) throw error;
 }
+
+export type UserInvite = {
+  id: string;
+  sheetId: string;
+  sheetName: string;
+  role: "viewer" | "editor" | "admin";
+  expiresAt: string;
+  tokenHash: string;
+  invitedByName: string | null;
+};
+
+export async function getUserInvites(email: string): Promise<UserInvite[]> {
+  const { data, error } = await supabase
+    .from("sheet_invites")
+    .select("id, role, expires_at, token_hash, sheets(id, name), inviter:profiles!invited_by(display_name, email)")
+    .eq("invited_email", email)
+    .eq("status", "pending")
+    .gt("expires_at", new Date().toISOString())
+    .order("expires_at", { ascending: true });
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const sheet = row.sheets as { id: string; name: string } | null;
+    const inviter = row.inviter as { display_name: string | null; email: string | null } | null;
+    return {
+      id: row.id,
+      sheetId: sheet?.id ?? "",
+      sheetName: sheet?.name ?? "",
+      role: row.role as UserInvite["role"],
+      expiresAt: row.expires_at,
+      tokenHash: row.token_hash,
+      invitedByName: inviter?.display_name ?? inviter?.email ?? null,
+    };
+  });
+}
+
+export async function declineInvite(inviteId: string): Promise<void> {
+  const { error } = await supabase
+    .from("sheet_invites")
+    .update({ status: "declined" })
+    .eq("id", inviteId);
+
+  if (error) throw error;
+}
