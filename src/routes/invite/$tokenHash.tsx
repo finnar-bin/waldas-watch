@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Badge,
   Box,
   Button,
   Center,
+  Flex,
   Loader,
   Paper,
   Stack,
@@ -16,6 +16,7 @@ import { useSession } from "@/providers/SessionProvider";
 import { signOut } from "@/lib/auth-requests";
 import { useInviteByTokenQuery } from "@/queries/use-invite-by-token-query";
 import { useAcceptInviteMutation } from "@/queries/use-accept-invite-mutation";
+import { useDeclineInviteMutation } from "@/queries/use-decline-invite-mutation";
 import { ROLE_COLORS } from "@/lib/constants/role-colors";
 
 export const Route = createFileRoute("/invite/$tokenHash")({
@@ -26,17 +27,18 @@ function InvitePage() {
   const { tokenHash } = Route.useParams();
   const { session, isLoading: sessionLoading } = useSession();
   const navigate = useNavigate();
-  const [accepted, setAccepted] = useState(false);
-
   const { data: invite, isLoading: inviteLoading, error } = useInviteByTokenQuery(tokenHash);
-  const acceptMutation = useAcceptInviteMutation();
+  const acceptMutation = useAcceptInviteMutation(session?.user.email);
+  const declineMutation = useDeclineInviteMutation(session?.user.email);
 
   async function handleAccept() {
     const result = await acceptMutation.mutateAsync(tokenHash);
-    setAccepted(true);
-    setTimeout(() => {
-      navigate({ to: "/sheets/$sheetId", params: { sheetId: result.sheetId } });
-    }, 1500);
+    navigate({ to: "/sheets/$sheetId", params: { sheetId: result.sheetId } });
+  }
+
+  async function handleDecline() {
+    await declineMutation.mutateAsync(invite!.id);
+    navigate({ to: "/sheets" });
   }
 
   const isExpired =
@@ -77,16 +79,6 @@ function InvitePage() {
                 </Text>
                 <Text size="sm" c="dimmed" ta="center">
                   This invite doesn't exist or the link is incorrect.
-                </Text>
-              </Stack>
-            ) : accepted ? (
-              <Stack align="center" gap="md">
-                <CheckCircle size={36} color="var(--mantine-color-teal-6)" />
-                <Text fw={600} ta="center">
-                  You've joined {invite.sheetName}!
-                </Text>
-                <Text size="sm" c="dimmed" ta="center">
-                  Redirecting you to the sheet…
                 </Text>
               </Stack>
             ) : invite.status === "revoked" ? (
@@ -193,15 +185,27 @@ function InvitePage() {
                     </Button>
                   </Stack>
                 ) : (
-                  <Button
-                    color="teal"
-                    fullWidth
-                    mt="xs"
-                    loading={acceptMutation.isPending}
-                    onClick={handleAccept}
-                  >
-                    Accept invite
-                  </Button>
+                  <Flex gap="xs" mt="xs">
+                    <Button
+                      color="teal"
+                      flex={1}
+                      loading={acceptMutation.isPending}
+                      disabled={declineMutation.isPending}
+                      onClick={handleAccept}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      variant="subtle"
+                      color="red"
+                      flex={1}
+                      loading={declineMutation.isPending}
+                      disabled={acceptMutation.isPending}
+                      onClick={handleDecline}
+                    >
+                      Decline
+                    </Button>
+                  </Flex>
                 )}
               </Stack>
             )}

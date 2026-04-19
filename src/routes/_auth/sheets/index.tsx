@@ -156,7 +156,7 @@ function SheetsPage() {
                           declineMutation.variables === invite.id
                         }
                         disabled={acceptMutation.isPending}
-                        onClick={() => declineMutation.mutate(invite.id)}
+                        onClick={() => declineMutation.mutateAsync(invite.id)}
                       >
                         Decline
                       </Button>

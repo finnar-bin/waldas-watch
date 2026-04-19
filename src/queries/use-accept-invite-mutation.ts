@@ -6,11 +6,13 @@ export function useAcceptInviteMutation(email?: string) {
 
   return useMutation({
     mutationFn: (tokenHash: string) => acceptInvite(tokenHash),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["user-sheets"] });
-      queryClient.invalidateQueries({ queryKey: ["user-invites", email] });
-      queryClient.invalidateQueries({ queryKey: ["sheet-invites", data.sheetId] });
-      queryClient.invalidateQueries({ queryKey: ["sheet-members", data.sheetId] });
+    onSuccess: async (data) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["user-sheets"] }),
+        queryClient.invalidateQueries({ queryKey: ["user-invites", email] }),
+        queryClient.invalidateQueries({ queryKey: ["sheet-invites", data.sheetId] }),
+        queryClient.invalidateQueries({ queryKey: ["sheet-members", data.sheetId] }),
+      ]);
     },
   });
 }

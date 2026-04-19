@@ -6,8 +6,8 @@ export function useDeclineInviteMutation(email: string | undefined) {
 
   return useMutation({
     mutationFn: (inviteId: string) => declineInvite(inviteId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-invites", email] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["user-invites", email] });
     },
   });
 }

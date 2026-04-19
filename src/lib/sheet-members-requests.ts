@@ -246,10 +246,8 @@ export async function getUserInvites(email: string): Promise<UserInvite[]> {
 }
 
 export async function declineInvite(inviteId: string): Promise<void> {
-  const { error } = await supabase
-    .from("sheet_invites")
-    .update({ status: "declined" })
-    .eq("id", inviteId);
-
+  const { error } = await supabase.functions.invoke("decline-invite", {
+    body: { inviteId },
+  });
   if (error) throw error;
 }
