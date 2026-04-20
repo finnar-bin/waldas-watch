@@ -15,6 +15,35 @@
     <title>Waldas Watch</title>
   </head>
   <body>
+    <div id="splash">
+      <img src="/pwa-icons/icon-512.png" alt="Waldas Watch" />
+    </div>
+    <style>
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        transition: opacity 0.35s ease;
+      }
+      #splash.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #splash img {
+        width: 128px;
+        height: 128px;
+        animation: splash-bounce 1s ease-in-out infinite;
+      }
+      @keyframes splash-bounce {
+        0%   { transform: scale(0.85) rotate(0deg); }
+        50%  { transform: scale(1.15) rotate(180deg); }
+        100% { transform: scale(0.85) rotate(360deg); }
+      }
+    </style>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
