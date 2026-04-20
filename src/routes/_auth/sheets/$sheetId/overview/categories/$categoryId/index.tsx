@@ -217,7 +217,10 @@ function CategoryTransactionsPage() {
               const date = new Date(tx.date + "T00:00:00");
               const monthAbbr = MONTH_ABBR[date.getMonth()];
               const day = date.getDate();
-              const creatorInitials = getInitials(tx.creatorDisplayName, tx.creatorEmail);
+              const creatorInitials = getInitials(
+                tx.creatorDisplayName,
+                tx.creatorEmail,
+              );
 
               return (
                 <div
@@ -265,7 +268,7 @@ function CategoryTransactionsPage() {
 
                       <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
                         <Text size="sm" fw={600} lineClamp={2}>
-                          {tx.description ?? category?.name}
+                          {tx.description || category?.name}
                         </Text>
                         {tx.paymentTypeName && (
                           <Group gap={4} align="center">

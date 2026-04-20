@@ -34,3 +34,6 @@ pnpm-debug.log*
 
 # TanStack Router generated file (committed to version control)
 # src/routeTree.gen.ts
+
+# TanStack dev server artifacts
+.tanstack/
