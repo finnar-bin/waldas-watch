@@ -16,6 +16,7 @@ export function useDeleteTransactionMutation(sheetId: string, categoryId: string
       queryClient.invalidateQueries({ queryKey: ['recent-sheet-transactions', sheetId] })
       queryClient.invalidateQueries({ queryKey: ['current-month-sheet-totals', sheetId] })
       queryClient.invalidateQueries({ queryKey: ['current-month-sheet-category-totals', sheetId] })
+      queryClient.invalidateQueries({ queryKey: ['sheet-transactions-infinite', sheetId] })
     },
   })
 

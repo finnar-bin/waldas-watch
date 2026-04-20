@@ -21,14 +21,13 @@ import {
 import { Trash2 } from "lucide-react";
 import { SheetHeader } from "@/components/SheetHeader";
 import { BackLink } from "@/components/BackLink";
-import { IconCombobox } from "@/components/IconCombobox";
+import { CategoryCombobox } from "@/components/CategoryCombobox";
+import { PaymentTypeCombobox } from "@/components/PaymentTypeCombobox";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { useSheetRecurringTransactionsQuery } from "@/queries/use-sheet-recurring-transactions-query";
 import { useUpdateRecurringTransactionMutation } from "@/queries/use-update-recurring-transaction-mutation";
 import { useDeleteRecurringTransactionMutation } from "@/queries/use-delete-recurring-transaction-mutation";
-import { useSheetTransactionCategoriesQuery } from "@/queries/use-sheet-transaction-categories-query";
-import { useSheetPaymentTypesQuery } from "@/queries/use-sheet-payment-types-query";
 import type { RecurringFrequency } from "@/lib/recurring-transactions-requests";
 
 export const Route = createFileRoute(
@@ -106,12 +105,6 @@ function EditRecurringPage() {
     form.resetDirty();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recurring?.id]);
-
-  const { data: categories = [] } = useSheetTransactionCategoriesQuery(
-    sheetId,
-    form.values.type,
-  );
-  const { data: paymentTypes = [] } = useSheetPaymentTypesQuery(sheetId);
 
   async function handleDelete() {
     await deleteMutation.mutateAsync(recurringId);
@@ -233,14 +226,10 @@ function EditRecurringPage() {
                 ]}
                 color="teal"
               />
-              <IconCombobox
+              <CategoryCombobox
+                sheetId={sheetId}
+                type={form.values.type}
                 label="Category"
-                placeholder="Select a category"
-                items={categories.map((c) => ({
-                  id: c.id,
-                  name: c.name,
-                  icon: c.icon,
-                }))}
                 value={form.values.categoryId || null}
                 onChange={(v) => form.setFieldValue("categoryId", v ?? "")}
                 error={form.errors.categoryId}
@@ -253,14 +242,9 @@ function EditRecurringPage() {
                 {...form.getInputProps("amount")}
               />
               {form.values.type === "expense" && (
-                <IconCombobox
+                <PaymentTypeCombobox
+                  sheetId={sheetId}
                   label="Payment type"
-                  placeholder="Select a payment type"
-                  items={paymentTypes.map((p) => ({
-                    id: p.id,
-                    name: p.name,
-                    icon: p.icon,
-                  }))}
                   value={form.values.paymentTypeId || null}
                   onChange={(v) => form.setFieldValue("paymentTypeId", v ?? "")}
                   error={form.errors.paymentTypeId}

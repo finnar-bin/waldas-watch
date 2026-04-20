@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
   Box,
@@ -19,33 +19,24 @@ import { SheetHeader } from "@/components/SheetHeader";
 import { TransactionForm, FormValues } from "@/components/TransactionForm";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
-import { useSheetTransactionCategoriesQuery } from "@/queries/use-sheet-transaction-categories-query";
-import { useSheetPaymentTypesQuery } from "@/queries/use-sheet-payment-types-query";
 import { useTransactionQuery } from "@/queries/use-transaction-query";
 import { useUpdateTransactionMutation } from "@/queries/use-update-transaction-mutation";
 import { useDeleteTransactionMutation } from "@/queries/use-delete-transaction-mutation";
 
-const currentYear = new Date().getFullYear();
-const currentMonth = new Date().getMonth() + 1;
-
 export const Route = createFileRoute(
-  "/_auth/sheets/$sheetId/overview/$categoryId/edit",
+  "/_auth/sheets/$sheetId/overview/categories/$categoryId/edit",
 )({
   validateSearch: (search: Record<string, unknown>) => ({
     transactionId:
       typeof search.transactionId === "string" ? search.transactionId : "",
-    year: typeof search.year === "number" ? search.year : currentYear,
-    month: typeof search.month === "number" ? search.month : currentMonth,
-    type:
-      search.type === "income" ? "income" : ("expense" as "expense" | "income"),
   }),
   component: EditTransactionPage,
 });
 
 function EditTransactionPage() {
   const { sheetId, categoryId } = Route.useParams();
-  const { transactionId, year, month, type } = Route.useSearch();
-  const navigate = useNavigate();
+  const { transactionId } = Route.useSearch();
+  const router = useRouter();
   const { session } = useSession();
 
   const { data: sheets } = useUserSheetsQuery(session?.user.id);
@@ -93,12 +84,6 @@ function EditTransactionPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transaction]);
 
-  const { data: categories } = useSheetTransactionCategoriesQuery(
-    sheetId,
-    form.values.type,
-  );
-  const { data: paymentTypes } = useSheetPaymentTypesQuery(sheetId);
-
   const handleSubmit = form.onSubmit(async (values) => {
     await mutation.mutateAsync({
       transactionId,
@@ -116,28 +101,16 @@ function EditTransactionPage() {
       },
     });
 
-    navigate({
-      to: "/sheets/$sheetId/overview/$categoryId",
-      params: { sheetId, categoryId },
-      search: { year, month, type },
-    });
+    router.history.back();
   });
 
   function handleCancel() {
-    navigate({
-      to: "/sheets/$sheetId/overview/$categoryId",
-      params: { sheetId, categoryId },
-      search: { year, month, type },
-    });
+    router.history.back();
   }
 
   async function handleDelete() {
     await deleteMutation.mutateAsync(transactionId);
-    navigate({
-      to: "/sheets/$sheetId/overview/$categoryId",
-      params: { sheetId, categoryId },
-      search: { year, month, type },
-    });
+    router.history.back();
   }
 
   if (isLoadingTransaction) {
@@ -187,9 +160,8 @@ function EditTransactionPage() {
           <form onSubmit={handleSubmit}>
             <Stack gap="md">
               <TransactionForm
+                sheetId={sheetId}
                 form={form}
-                categories={categories ?? []}
-                paymentTypes={paymentTypes ?? []}
                 showTypeToggle={false}
                 disabled={mutation.isPending || deleteMutation.isPending}
               />
@@ -198,14 +170,7 @@ function EditTransactionPage() {
                   {mutation.error?.message ?? "Something went wrong."}
                 </Text>
               )}
-              <Group grow mt="xs">
-                <Button
-                  variant="default"
-                  onClick={handleCancel}
-                  disabled={mutation.isPending || deleteMutation.isPending}
-                >
-                  Cancel
-                </Button>
+              <Stack gap="xs" mt="xs">
                 <Button
                   type="submit"
                   color="teal"
@@ -214,7 +179,14 @@ function EditTransactionPage() {
                 >
                   Save
                 </Button>
-              </Group>
+                <Button
+                  variant="default"
+                  onClick={handleCancel}
+                  disabled={mutation.isPending || deleteMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </Stack>
               <Divider />
               <Button
                 variant="outline"

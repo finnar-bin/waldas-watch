@@ -1,12 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Box, Button, Group, Paper, Stack, Text } from "@mantine/core";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Box, Button, Paper, Stack, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { SheetHeader } from "@/components/SheetHeader";
 import { TransactionForm, FormValues } from "@/components/TransactionForm";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
-import { useSheetTransactionCategoriesQuery } from "@/queries/use-sheet-transaction-categories-query";
-import { useSheetPaymentTypesQuery } from "@/queries/use-sheet-payment-types-query";
 import { useCreateSheetTransactionMutation } from "@/queries/use-create-sheet-transaction-mutation";
 
 export const Route = createFileRoute("/_auth/sheets/$sheetId/add-transaction")({
@@ -16,7 +14,7 @@ export const Route = createFileRoute("/_auth/sheets/$sheetId/add-transaction")({
 function TransactionFormPage() {
   const { sheetId } = Route.useParams();
   const { session } = useSession();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const { data: sheets } = useUserSheetsQuery(session?.user.id);
   const sheetName = sheets?.find((s) => s.id === sheetId)?.name ?? "…";
@@ -40,11 +38,6 @@ function TransactionFormPage() {
     },
   });
 
-  const { data: categories } = useSheetTransactionCategoriesQuery(
-    sheetId,
-    form.values.type,
-  );
-  const { data: paymentTypes } = useSheetPaymentTypesQuery(sheetId);
   const mutation = useCreateSheetTransactionMutation(sheetId);
 
   const handleSubmit = form.onSubmit(async (values) => {
@@ -68,15 +61,11 @@ function TransactionFormPage() {
       description: values.description.trim() || null,
     });
 
-    navigate({ to: "/sheets/$sheetId", params: { sheetId } });
+    router.history.back();
   });
 
   function handleCancel() {
-    if (history.length > 1) {
-      history.back();
-    } else {
-      navigate({ to: "/sheets/$sheetId", params: { sheetId } });
-    }
+    router.history.back();
   }
 
   return (
@@ -86,9 +75,8 @@ function TransactionFormPage() {
         <form onSubmit={handleSubmit}>
           <Stack gap="md">
             <TransactionForm
+              sheetId={sheetId}
               form={form}
-              categories={categories ?? []}
-              paymentTypes={paymentTypes ?? []}
               disabled={mutation.isPending}
             />
             {mutation.isError && (
@@ -96,7 +84,10 @@ function TransactionFormPage() {
                 {mutation.error?.message ?? "Something went wrong."}
               </Text>
             )}
-            <Group grow mt="xs">
+            <Stack gap="xs" mt="xs">
+              <Button type="submit" color="teal" loading={mutation.isPending}>
+                Save
+              </Button>
               <Button
                 variant="default"
                 onClick={handleCancel}
@@ -104,10 +95,7 @@ function TransactionFormPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" color="teal" loading={mutation.isPending}>
-                Save
-              </Button>
-            </Group>
+            </Stack>
           </Stack>
         </form>
       </Paper>
