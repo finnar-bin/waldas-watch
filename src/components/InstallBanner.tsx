@@ -10,6 +10,7 @@ export function InstallBanner() {
       <Alert
         icon={<Download size={16} />}
         color="teal"
+        variant="filled"
         radius={0}
         style={{ position: 'sticky', top: 0, zIndex: 998 }}
       >
@@ -38,6 +39,7 @@ export function InstallBanner() {
       <Alert
         icon={<Share size={16} />}
         color="teal"
+        variant="filled"
         radius={0}
         style={{ position: 'sticky', top: 0, zIndex: 998 }}
       >

@@ -11,6 +11,7 @@ export function OfflineBanner() {
     <Alert
       icon={<WifiOff size={16} />}
       color="orange"
+      variant="filled"
       radius={0}
       style={{ position: 'sticky', top: 0, zIndex: 1000 }}
     >

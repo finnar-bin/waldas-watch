@@ -10,6 +10,7 @@ export function SyncBanner() {
       <Alert
         icon={<Loader size={16} color="blue" />}
         color="blue"
+        variant="filled"
         radius={0}
         style={{ position: 'sticky', top: 0, zIndex: 999 }}
       >
@@ -23,6 +24,7 @@ export function SyncBanner() {
       <Alert
         icon={<AlertCircle size={16} />}
         color="red"
+        variant="filled"
         radius={0}
         style={{ position: 'sticky', top: 0, zIndex: 999 }}
       >
@@ -43,6 +45,7 @@ export function SyncBanner() {
       <Alert
         icon={<RefreshCw size={16} />}
         color="yellow"
+        variant="filled"
         radius={0}
         style={{ position: 'sticky', top: 0, zIndex: 999 }}
       >
