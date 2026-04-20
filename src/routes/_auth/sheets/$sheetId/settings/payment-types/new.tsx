@@ -86,6 +86,13 @@ function NewPaymentTypePage() {
             >
               Add payment type
             </Button>
+            <Button
+              variant="subtle"
+              color="gray"
+              onClick={() => navigate({ to: ".." })}
+            >
+              Cancel
+            </Button>
           </Stack>
         </form>
       </Paper>
