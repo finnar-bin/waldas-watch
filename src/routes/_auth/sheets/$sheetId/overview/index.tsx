@@ -78,7 +78,7 @@ function OverviewPage() {
         cat.budget != null ? (cat.totalAmount / cat.budget) * 100 : null;
       const isOverBudget = budgetPct != null && budgetPct > 100;
       const isNearBudget =
-        budgetPct != null && budgetPct >= 85 && !isOverBudget;
+        budgetPct != null && budgetPct >= 85 && budgetPct < 100;
       const barValue =
         cat.budget != null
           ? Math.min(budgetPct!, 100)

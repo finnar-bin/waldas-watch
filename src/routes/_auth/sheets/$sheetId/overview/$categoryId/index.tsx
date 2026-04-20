@@ -108,7 +108,7 @@ function CategoryTransactionsPage() {
   );
   const budgetPct = budget != null ? (totalAmount / budget) * 100 : null;
   const isOverBudget = budgetPct != null && budgetPct > 100;
-  const isNearBudget = budgetPct != null && budgetPct >= 85 && !isOverBudget;
+  const isNearBudget = budgetPct != null && budgetPct >= 85 && budgetPct < 100;
   const barColor =
     budget != null
       ? isOverBudget
