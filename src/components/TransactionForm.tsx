@@ -3,11 +3,7 @@ import { NumberInput, SegmentedControl, Textarea } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import "@mantine/dates/styles.css";
 import { CategoryCombobox } from "@/components/CategoryCombobox";
-import { IconCombobox } from "@/components/IconCombobox";
-import type {
-  TransactionCategoryOption,
-  PaymentTypeOption,
-} from "@/lib/transaction-form-requests";
+import { PaymentTypeCombobox } from "@/components/PaymentTypeCombobox";
 
 export interface FormValues {
   type: "expense" | "income";
@@ -19,17 +15,15 @@ export interface FormValues {
 }
 
 interface TransactionFormProps {
+  sheetId: string;
   form: UseFormReturnType<FormValues>;
-  categories: TransactionCategoryOption[];
-  paymentTypes: PaymentTypeOption[];
   showTypeToggle?: boolean;
   disabled?: boolean;
 }
 
 export function TransactionForm({
+  sheetId,
   form,
-  categories,
-  paymentTypes,
   showTypeToggle = true,
   disabled = false,
 }: TransactionFormProps) {
@@ -56,17 +50,15 @@ export function TransactionForm({
       )}
 
       <CategoryCombobox
+        sheetId={sheetId}
+        type={form.values.type}
         label="Category"
-        categories={categories}
         value={form.values.categoryId}
         disabled={disabled}
-        onChange={(val) => {
-          const selected = categories.find((c) => c.id === val);
+        onChange={(val, item) => {
           form.setValues({
             categoryId: val,
-            ...(selected?.defaultAmount != null && {
-              amount: selected.defaultAmount,
-            }),
+            ...(item?.defaultAmount != null && { amount: item.defaultAmount }),
           });
         }}
         error={form.errors.categoryId}
@@ -91,10 +83,9 @@ export function TransactionForm({
       />
 
       {form.values.type === "expense" && (
-        <IconCombobox
+        <PaymentTypeCombobox
+          sheetId={sheetId}
           label="Payment type"
-          placeholder="Select a payment type"
-          items={paymentTypes}
           value={form.values.paymentTypeId}
           disabled={disabled}
           onChange={(val) => form.setFieldValue("paymentTypeId", val)}

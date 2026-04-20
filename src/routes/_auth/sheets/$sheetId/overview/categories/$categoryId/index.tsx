@@ -64,7 +64,7 @@ const MONTH_ABBR = [
 ];
 
 export const Route = createFileRoute(
-  "/_auth/sheets/$sheetId/overview/$categoryId/",
+  "/_auth/sheets/$sheetId/overview/categories/$categoryId/",
 )({
   validateSearch: (search: Record<string, unknown>) => ({
     year: typeof search.year === "number" ? search.year : currentYear,
@@ -131,7 +131,7 @@ function CategoryTransactionsPage() {
       <SheetHeader sheetName={sheetName} pageTitle={category?.name ?? "…"} />
 
       <BackLink
-        to="/sheets/$sheetId/overview"
+        to="/sheets/$sheetId/overview/categories"
         params={{ sheetId }}
         label="Overview"
       />
@@ -240,9 +240,9 @@ function CategoryTransactionsPage() {
                     style={{ border: "none", cursor: "pointer" }}
                     onClick={() =>
                       navigate({
-                        to: "/sheets/$sheetId/overview/$categoryId/edit",
+                        to: "/sheets/$sheetId/overview/categories/$categoryId/edit",
                         params: { sheetId, categoryId },
-                        search: { transactionId: tx.id, year, month, type },
+                        search: { transactionId: tx.id },
                       })
                     }
                   >

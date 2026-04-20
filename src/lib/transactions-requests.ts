@@ -236,6 +236,109 @@ export async function getCurrentMonthSheetTotals(
   return { incomeTotal, expenseTotal, exceededBudgetTotal }
 }
 
+export type SheetTransaction = {
+  id: string
+  amount: number
+  type: 'income' | 'expense'
+  description: string | null
+  date: string
+  categoryId: string | null
+  categoryName: string | null
+  categoryIcon: string | null
+  creatorName: string | null
+  creatorAvatarUrl: string | null
+  creatorEmail: string | null
+}
+
+export type TransactionFilters = {
+  from?: string
+  to?: string
+  categoryId?: string
+  paymentTypeId?: string
+  creatorId?: string
+}
+
+export async function getSheetTransactionsPaginated(
+  sheetId: string,
+  page: number,
+  pageSize: number,
+  search: string,
+  filters: TransactionFilters = {},
+): Promise<SheetTransaction[]> {
+  const from = page * pageSize
+  const to = from + pageSize - 1
+
+  let query = supabase
+    .from('transactions')
+    .select('id, amount, type, description, date, created_by, category_id, category:categories(name, icon)')
+    .eq('sheet_id', sheetId)
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (filters.from) query = query.gte('date', filters.from)
+  if (filters.to) query = query.lte('date', filters.to)
+  if (filters.categoryId) query = query.eq('category_id', filters.categoryId)
+  if (filters.paymentTypeId) query = query.eq('payment_type_id', filters.paymentTypeId)
+  if (filters.creatorId) query = query.eq('created_by', filters.creatorId)
+
+  if (search.trim()) {
+    const term = search.trim()
+    const { data: matchingCategories } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('sheet_id', sheetId)
+      .ilike('name', `%${term}%`)
+
+    const categoryIds = (matchingCategories ?? []).map((c) => c.id)
+
+    if (categoryIds.length > 0) {
+      query = query.or(
+        `description.ilike.%${term}%,category_id.in.(${categoryIds.join(',')})`,
+      )
+    } else {
+      query = query.ilike('description', `%${term}%`)
+    }
+  }
+
+  const { data: txData, error: txError } = await query
+  if (txError) throw txError
+
+  const rows = txData ?? []
+
+  const creatorIds = [...new Set(rows.map((r) => r.created_by).filter(Boolean))]
+  const profileMap = new Map<string, { display_name: string | null; avatar_url: string | null; email: string | null }>()
+
+  if (creatorIds.length > 0) {
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url, email')
+      .in('id', creatorIds)
+    if (profileError) throw profileError
+    for (const p of profileData ?? []) {
+      profileMap.set(p.id, { display_name: p.display_name, avatar_url: p.avatar_url, email: p.email })
+    }
+  }
+
+  return rows.map((row) => {
+    const category = row.category as unknown as { name: string; icon: string } | null
+    const creator = profileMap.get(row.created_by) ?? null
+    return {
+      id: row.id,
+      amount: Number(row.amount),
+      type: row.type as 'income' | 'expense',
+      description: row.description ?? null,
+      date: row.date,
+      categoryId: row.category_id ?? null,
+      categoryName: category?.name ?? null,
+      categoryIcon: category?.icon ?? null,
+      creatorName: creator?.display_name ?? null,
+      creatorAvatarUrl: creator?.avatar_url ?? null,
+      creatorEmail: creator?.email ?? null,
+    }
+  })
+}
+
 export async function getCurrentMonthSheetCategoryTotals(
   sheetId: string,
 ): Promise<MonthlySheetCategoryTotals> {

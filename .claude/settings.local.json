@@ -14,7 +14,10 @@
       "Bash(curl *)",
       "Bash(python3 -c \"import json, sys; data = json.load\\(sys.stdin\\); [print\\(f['name']\\) for f in data if 'schema' in f['name']]\")",
       "Bash(npx tsc *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(rm '/home/nar/Developer/personal/waldas-watch/src/routes/_auth/sheets/$sheetId/overview/$categoryId/index.tsx' '/home/nar/Developer/personal/waldas-watch/src/routes/_auth/sheets/$sheetId/overview/$categoryId/edit.tsx')",
+      "Bash(rmdir '/home/nar/Developer/personal/waldas-watch/src/routes/_auth/sheets/$sheetId/overview/$categoryId')",
+      "Bash(kill %1)"
     ]
   }
 }

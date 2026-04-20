@@ -10,7 +10,7 @@ Finance apps live or die by visualization. Numbers alone don't tell the story.
 - Monthly income vs expenses (bar chart)
 - Spending over time (line chart)
 
-### 2. Transaction Search & Filter
+### 2. Transaction Search & Filter ✅
 Becomes painful once a sheet has 30+ transactions.
 - Search by description or amount
 - Filter by category, payment type, date range
@@ -60,7 +60,7 @@ Nice-to-haves once the core is solid.
 
 ## Suggested Build Order
 
-`Charts → Search/Filter → Push Notifications → Trends → AI Assistant → CSV Export`
+`Charts → ~~Search/Filter~~ → Push Notifications → Trends → AI Assistant → CSV Export`
 
 ---
 
