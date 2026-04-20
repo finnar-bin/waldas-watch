@@ -141,6 +141,12 @@ function LoginPage() {
               Sign up.
             </Anchor>
           </Text>
+
+          <Text ta="center" size="xs" c="dimmed">
+            <Anchor component={Link} to="/privacy" c="dimmed">
+              Privacy Policy
+            </Anchor>
+          </Text>
         </Stack>
       </Box>
     </Center>
