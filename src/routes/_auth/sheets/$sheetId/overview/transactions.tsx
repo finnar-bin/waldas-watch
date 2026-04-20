@@ -458,24 +458,33 @@ function TransactionsPage() {
 
                         <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
                           <Text size="sm" fw={600} lineClamp={2}>
-                            {tx.description ?? tx.categoryName}
+                            {tx.description || tx.categoryName}
                           </Text>
                           {tx.categoryName && (
-                            <Group gap={4} align="center">
-                              <Box
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                }}
-                              >
+                            <Group gap={4} align="center" wrap="nowrap" style={{ minWidth: 0 }}>
+                              <Box style={{ flexShrink: 0, display: "flex" }}>
                                 <TransactionCategoryIcon
                                   icon={tx.categoryIcon}
                                   size={12}
                                   color="var(--mantine-color-dimmed)"
                                 />
                               </Box>
-                              <Text size="xs" c="dimmed">
+                              <Text size="xs" c="dimmed" truncate>
                                 {tx.categoryName}
+                              </Text>
+                            </Group>
+                          )}
+                          {tx.paymentTypeName && (
+                            <Group gap={4} align="center" wrap="nowrap" style={{ minWidth: 0 }}>
+                              <Box style={{ flexShrink: 0, display: "flex" }}>
+                                <TransactionCategoryIcon
+                                  icon={tx.paymentTypeIcon}
+                                  size={12}
+                                  color="var(--mantine-color-dimmed)"
+                                />
+                              </Box>
+                              <Text size="xs" c="dimmed" truncate>
+                                {tx.paymentTypeName}
                               </Text>
                             </Group>
                           )}

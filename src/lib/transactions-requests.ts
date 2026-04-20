@@ -245,6 +245,8 @@ export type SheetTransaction = {
   categoryId: string | null
   categoryName: string | null
   categoryIcon: string | null
+  paymentTypeName: string | null
+  paymentTypeIcon: string | null
   creatorName: string | null
   creatorAvatarUrl: string | null
   creatorEmail: string | null
@@ -270,7 +272,7 @@ export async function getSheetTransactionsPaginated(
 
   let query = supabase
     .from('transactions')
-    .select('id, amount, type, description, date, created_by, category_id, category:categories(name, icon)')
+    .select('id, amount, type, description, date, created_by, category_id, category:categories(name, icon), payment_type:payment_types(name, icon)')
     .eq('sheet_id', sheetId)
     .order('date', { ascending: false })
     .order('created_at', { ascending: false })
@@ -322,6 +324,7 @@ export async function getSheetTransactionsPaginated(
 
   return rows.map((row) => {
     const category = row.category as unknown as { name: string; icon: string } | null
+    const paymentType = row.payment_type as unknown as { name: string; icon: string } | null
     const creator = profileMap.get(row.created_by) ?? null
     return {
       id: row.id,
@@ -332,6 +335,8 @@ export async function getSheetTransactionsPaginated(
       categoryId: row.category_id ?? null,
       categoryName: category?.name ?? null,
       categoryIcon: category?.icon ?? null,
+      paymentTypeName: paymentType?.name ?? null,
+      paymentTypeIcon: paymentType?.icon ?? null,
       creatorName: creator?.display_name ?? null,
       creatorAvatarUrl: creator?.avatar_url ?? null,
       creatorEmail: creator?.email ?? null,
