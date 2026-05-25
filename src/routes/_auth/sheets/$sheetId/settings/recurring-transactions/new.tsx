@@ -67,7 +67,6 @@ function NewRecurringPage() {
       amount: (v) =>
         v === "" || Number(v) <= 0 ? "Enter a valid amount" : null,
       paymentTypeId: (v, values) => {
-        console.log("value", v, values);
         return values.type === "expense" && !v
           ? "Payment type is required"
           : null;
