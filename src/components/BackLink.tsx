@@ -4,15 +4,23 @@ import { ChevronLeft } from 'lucide-react'
 interface BackLinkProps {
   to: string
   params?: Record<string, string>
+  search?: Record<string, unknown>
   label: string
   rightSection?: React.ReactNode
 }
 
-export function BackLink({ to, params, label, rightSection }: BackLinkProps) {
+export function BackLink({
+  to,
+  params,
+  search,
+  label,
+  rightSection,
+}: BackLinkProps) {
   const link = (
     <Link
       to={to}
       params={params}
+      search={search}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

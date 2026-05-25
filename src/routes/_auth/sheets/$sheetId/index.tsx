@@ -222,7 +222,7 @@ function SheetHomePage() {
                 </Box>
                 <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm" fw={600} truncate>
-                    {tx.description ?? tx.categoryName ?? "—"}
+                    {tx.description?.trim() || tx.categoryName || "-"}
                   </Text>
                   <Text size="xs" c="dimmed">
                     {formatDate(tx.date)}

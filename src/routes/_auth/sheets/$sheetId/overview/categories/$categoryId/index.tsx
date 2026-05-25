@@ -77,7 +77,7 @@ export const Route = createFileRoute(
 
 function CategoryTransactionsPage() {
   const { sheetId, categoryId } = Route.useParams();
-  const { year, month } = Route.useSearch();
+  const { year, month, type } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const { session } = useSession();
 
@@ -133,6 +133,7 @@ function CategoryTransactionsPage() {
       <BackLink
         to="/sheets/$sheetId/overview/categories"
         params={{ sheetId }}
+        search={{ year, month, type }}
         label="Overview"
       />
 
