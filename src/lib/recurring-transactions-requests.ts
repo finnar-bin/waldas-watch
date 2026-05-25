@@ -1,4 +1,5 @@
 import { supabase } from './supabase-client'
+import { computeNextProcessDate } from '@/utils/compute-next-process-date'
 
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
@@ -78,6 +79,12 @@ export async function getSheetRecurringTransactions(
 export async function createRecurringTransaction(
   input: CreateRecurringTransactionInput,
 ): Promise<void> {
+  const nextProcessDate = computeNextProcessDate(
+    new Date(),
+    input.frequency,
+    input.dayOfMonth,
+  )
+
   const { error } = await supabase.from('recurring_transactions').insert({
     sheet_id: input.sheetId,
     created_by: input.createdBy,
@@ -88,6 +95,7 @@ export async function createRecurringTransaction(
     description: input.description,
     frequency: input.frequency,
     day_of_month: input.dayOfMonth,
+    next_process_date: nextProcessDate,
     is_active: true,
   })
 
@@ -98,6 +106,12 @@ export async function updateRecurringTransaction(
   id: string,
   input: UpdateRecurringTransactionInput,
 ): Promise<void> {
+  const nextProcessDate = computeNextProcessDate(
+    new Date(),
+    input.frequency,
+    input.dayOfMonth,
+  )
+
   const { error } = await supabase
     .from('recurring_transactions')
     .update({
@@ -108,6 +122,7 @@ export async function updateRecurringTransaction(
       description: input.description,
       frequency: input.frequency,
       day_of_month: input.dayOfMonth,
+      next_process_date: nextProcessDate,
     })
     .eq('id', id)
 
