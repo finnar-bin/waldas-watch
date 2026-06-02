@@ -12,6 +12,10 @@ This repo uses Supabase CLI migrations as the single source of truth for schema 
 - Apply changes to `dev` first, then `prod`.
 - Do not create prod-only migrations.
 - Use `supabase migration repair` only to fix migration history mismatches.
+- Do not assume `.env.development` or `.env.production` changes the Supabase CLI target. Commands with `--linked` use the project in `supabase/.temp/project-ref`.
+- Use `npm run db:push:dev` and `npm run db:push:prod` rather than raw `supabase db push`; those scripts relink before pushing.
+- For new tables exposed through Supabase REST/Data API, explicitly grant the intended roles (`authenticated`, `service_role`, and only `anon` when public access is intentional). New tables may not be exposed automatically.
+- Keep shared RLS helper functions, such as `has_sheet_role` and `is_sheet_member`, aligned through migrations before using them in new policies.
 
 ## Required Environment Variables
 
@@ -51,6 +55,26 @@ npm run db:push:dev
 ```
 
 4. Validate app behavior against dev.
+
+For new REST/Data API tables, verify both Postgres and REST. First confirm the CLI is linked to dev, then check table existence:
+
+```bash
+npm run db:link:dev
+npx dotenv -e .env.development -- npx supabase db query --linked "select to_regclass('public.your_table_name');"
+```
+
+Then verify the app or REST endpoint. If REST returns `PGRST205`, confirm `supabase/.temp/project-ref` matches `VITE_SUPABASE_URL`, then reload PostgREST schema:
+
+```sql
+notify pgrst, 'reload schema';
+```
+
+If PostgREST still does not recognize new objects, run Supabase's documented notification queue refresh:
+
+```sql
+select pg_notification_queue_usage();
+```
+
 5. Promote the exact same migration to prod:
 
 ```bash
@@ -69,6 +93,8 @@ npm run db:list
 - `npm run db:link:prod`
 
 These scripts load `.env.development` or `.env.production` automatically via `dotenv-cli`.
+
+After switching targets, verify `supabase/.temp/project-ref` when in doubt. Avoid running environment-specific verification queries with `--linked` until the CLI has been linked to the intended project.
 
 ## Repair Commands (History Only)
 

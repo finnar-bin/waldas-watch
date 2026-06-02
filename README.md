@@ -77,11 +77,13 @@ App runs at `http://localhost:5173`.
 | `npm run typecheck` | TypeScript type check (no emit) |
 | `npm run db:link:dev` | Link Supabase CLI to dev project |
 | `npm run db:link:prod` | Link Supabase CLI to prod project |
-| `npm run db:push:dev` | Push migrations to dev |
-| `npm run db:push:prod` | Push migrations to prod |
-| `npm run db:list` | List all migrations |
+| `npm run db:push:dev` | Link Supabase CLI to dev, then push migrations |
+| `npm run db:push:prod` | Link Supabase CLI to prod, then push migrations |
+| `npm run db:list` | List migrations for the currently linked Supabase project |
 | `npm run functions:deploy:dev` | Deploy Edge Functions to dev |
 | `npm run functions:deploy:prod` | Deploy Edge Functions to prod |
+
+Supabase CLI commands that use `--linked` depend on the local link stored under `supabase/.temp/`. Use the project-specific scripts above instead of raw `supabase db push` so migrations do not accidentally target the wrong project.
 
 ## Deployment
 

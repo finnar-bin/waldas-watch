@@ -16,6 +16,7 @@ import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { SheetHeader } from "@/components/SheetHeader";
 import { OverviewTabs } from "@/components/OverviewTabs";
 import { TransactionCategoryIcon } from "@/components/TransactionCategoryIcon";
+import { MonthlySheetNote } from "@/components/MonthlySheetNote";
 import { useSession } from "@/providers/SessionProvider";
 import { useSheetTransactionOverviewQuery } from "@/queries/use-sheet-transaction-overview-query";
 import { useSheetCurrencyQuery } from "@/queries/use-sheet-currency-query";
@@ -64,7 +65,9 @@ function CategoriesPage() {
   const { session } = useSession();
 
   const { data: sheets } = useUserSheetsQuery(session?.user.id);
-  const sheetName = sheets?.find((s) => s.id === sheetId)?.name ?? "…";
+  const sheet = sheets?.find((s) => s.id === sheetId);
+  const sheetName = sheet?.name ?? "…";
+  const canEditNotes = sheet?.role === "editor" || sheet?.role === "admin";
 
   const { data: currency } = useSheetCurrencyQuery(sheetId);
   const { data: categories, isLoading } = useSheetTransactionOverviewQuery(
@@ -142,6 +145,14 @@ function CategoriesPage() {
             autoComplete="off"
           />
         </Group>
+
+        <MonthlySheetNote
+          sheetId={sheetId}
+          year={year}
+          month={month}
+          userId={session?.user.id}
+          canEdit={canEditNotes}
+        />
 
         <SegmentedControl
           fullWidth
