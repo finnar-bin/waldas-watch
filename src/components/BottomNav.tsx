@@ -1,6 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Box, Flex, Text, UnstyledButton } from "@mantine/core";
-import { Home, LayoutDashboard, Plus, Settings } from "lucide-react";
+import {
+  Bot,
+  Home,
+  LayoutDashboard,
+  Plus,
+  Settings,
+} from "lucide-react";
 
 interface NavItemProps {
   to: string;
@@ -99,9 +105,15 @@ function AddButton({ sheetId }: { sheetId: string }) {
 
 interface BottomNavProps {
   sheetId: string;
+  onOpenAssistant: () => void;
+  assistantOpened?: boolean;
 }
 
-export function BottomNav({ sheetId }: BottomNavProps) {
+export function BottomNav({
+  sheetId,
+  onOpenAssistant,
+  assistantOpened = false,
+}: BottomNavProps) {
   const params = { sheetId };
 
   return (
@@ -134,6 +146,35 @@ export function BottomNav({ sheetId }: BottomNavProps) {
           label="Settings"
           exactPath={false}
         />
+        <UnstyledButton
+          onClick={onOpenAssistant}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            width: "100%",
+            flex: 1,
+          }}
+        >
+          <Bot
+            size={22}
+            color={
+              assistantOpened
+                ? "var(--mantine-color-teal-7)"
+                : "var(--mantine-color-gray-6)"
+            }
+            strokeWidth={assistantOpened ? 2.5 : 1.75}
+          />
+          <Text
+            size="xs"
+            fw={assistantOpened ? 600 : 400}
+            c={assistantOpened ? "teal.7" : "gray.6"}
+          >
+            Waldi
+          </Text>
+        </UnstyledButton>
         <AddButton sheetId={sheetId} />
       </Flex>
     </Box>
