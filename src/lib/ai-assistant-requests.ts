@@ -61,3 +61,16 @@ export async function askFinancialAssistant(
   if (!data) throw new Error('No response from assistant. Baka nag-merienda muna si AI.')
   return data
 }
+
+export async function getFinancialAssistantStarterInsights(
+  sheetId: string,
+): Promise<StarterInsight[]> {
+  const response = await askFinancialAssistant({
+    sheetId,
+    message: '__starter__',
+    promptType: 'starter_insights',
+    contextWindowMonths: 6,
+  })
+
+  return response.starterInsights ?? []
+}

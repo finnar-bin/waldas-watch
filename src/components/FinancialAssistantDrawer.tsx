@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Box,
@@ -23,6 +23,7 @@ import {
   StarterInsight,
 } from "@/lib/ai-assistant-requests";
 import { useFinancialAssistantMutation } from "@/queries/use-financial-assistant-mutation";
+import { useFinancialAssistantStarterInsightsQuery } from "@/queries/use-financial-assistant-starter-insights-query";
 
 type ChatRole = "user" | "assistant";
 
@@ -71,22 +72,22 @@ const QUICK_ACTIONS: QuickAction[] = [
 const FALLBACK_STARTER_INSIGHTS: StarterInsight[] = [
   {
     id: "over_budget",
-    title: "Over budget this month",
-    body: "You exceeded your budget by around P4,166 based on recent activity.",
-    actionLabel: "Explain why",
+    title: "Check this month's budget",
+    body: "See whether your current spending pace still fits your plan.",
+    actionLabel: "Review budget",
     actionPrompt: "Explain why I am over budget this month.",
   },
   {
-    id: "utilities",
-    title: "Utilities unusually high",
-    body: "Electricity spending appears higher than your usual monthly pattern.",
+    id: "spending_trends",
+    title: "Review monthly trends",
+    body: "Compare recent months and spot categories that are moving up.",
     actionLabel: "Analyze",
-    actionPrompt: "Analyze why my utilities spending is unusually high.",
+    actionPrompt: "Show my spending trend this month versus recent months.",
   },
   {
     id: "recurring",
-    title: "Recurring subscriptions detected",
-    body: "There are recurring charges that might be worth reviewing for savings.",
+    title: "Review recurring charges",
+    body: "Look for subscriptions and repeat expenses that may be worth trimming.",
     actionLabel: "Review",
     actionPrompt:
       "Review recurring subscriptions and suggest what to keep or cut.",
@@ -111,13 +112,9 @@ export function FinancialAssistantDrawer({
   sheetId,
 }: FinancialAssistantDrawerProps) {
   const mutation = useFinancialAssistantMutation();
-  const insightsMutation = useFinancialAssistantMutation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [drawerMode, setDrawerMode] = useState<"partial" | "full" | null>(null);
   const [systemError, setSystemError] = useState<string | null>(null);
-  const [starterInsights, setStarterInsights] = useState<StarterInsight[]>(
-    FALLBACK_STARTER_INSIGHTS,
-  );
   const [lastRequest, setLastRequest] = useState<{
     prompt: string;
     promptType: "quick_action" | "free_text";
@@ -146,40 +143,15 @@ export function FinancialAssistantDrawer({
     LOADING_MESSAGES[0];
   const hasActiveChat = messages.length > 0 || mutation.isPending;
   const resolvedDrawerMode = drawerMode ?? (hasActiveChat ? "full" : "partial");
+  const starterInsightsQuery = useFinancialAssistantStarterInsightsQuery(
+    sheetId,
+    opened && messages.length === 0,
+  );
 
   const suggestedFollowUps = useMemo(() => {
     if (!mutation.data?.suggestedFollowUps?.length) return [];
     return mutation.data.suggestedFollowUps.slice(0, 3);
   }, [mutation.data]);
-
-  useEffect(() => {
-    if (!opened || messages.length > 0) return;
-    let cancelled = false;
-
-    void insightsMutation
-      .mutateAsync({
-        sheetId,
-        message: "__starter__",
-        promptType: "starter_insights",
-        contextWindowMonths: 6,
-      })
-      .then((response) => {
-        if (cancelled) return;
-        if (response.starterInsights?.length) {
-          setStarterInsights(response.starterInsights);
-          return;
-        }
-        setStarterInsights(FALLBACK_STARTER_INSIGHTS);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setStarterInsights(FALLBACK_STARTER_INSIGHTS);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [opened, messages.length, sheetId]);
 
   async function sendPrompt(
     prompt: string,
@@ -238,6 +210,12 @@ export function FinancialAssistantDrawer({
     scrollViewportRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function handleClose() {
+    setDrawerMode(null);
+    touchStartY.current = null;
+    onClose();
+  }
+
   function handleDragStart(y: number) {
     touchStartY.current = y;
   }
@@ -246,14 +224,20 @@ export function FinancialAssistantDrawer({
     if (touchStartY.current === null) return;
     const delta = y - touchStartY.current;
     if (delta < -40) setDrawerMode("full");
-    if (delta > 40) setDrawerMode("partial");
+    if (delta > 40) {
+      if (resolvedDrawerMode === "full") {
+        setDrawerMode("partial");
+      } else {
+        handleClose();
+      }
+    }
     touchStartY.current = null;
   }
 
   return (
     <Drawer
       opened={opened}
-      onClose={onClose}
+      onClose={handleClose}
       withCloseButton={false}
       position="bottom"
       size={resolvedDrawerMode === "full" ? "100dvh" : "65dvh"}
@@ -261,8 +245,10 @@ export function FinancialAssistantDrawer({
       overlayProps={{ backgroundOpacity: 0.14, blur: 0 }}
       styles={{
         content: {
-          borderTopLeftRadius: "var(--mantine-radius-xl)",
-          borderTopRightRadius: "var(--mantine-radius-xl)",
+          borderTopLeftRadius:
+            resolvedDrawerMode === "full" ? 0 : "var(--mantine-radius-xl)",
+          borderTopRightRadius:
+            resolvedDrawerMode === "full" ? 0 : "var(--mantine-radius-xl)",
           display: "flex",
           flexDirection: "column",
         },
@@ -280,25 +266,27 @@ export function FinancialAssistantDrawer({
       }}
       title={
         <Stack gap={6} w="100%">
-          <Box
-            onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
-            onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientY)}
-            onMouseDown={(e) => handleDragStart(e.clientY)}
-            onMouseUp={(e) => handleDragEnd(e.clientY)}
-            style={{
-              width: 42,
-              height: 4,
-              borderRadius: 999,
-              background: "var(--mantine-color-gray-4)",
-              alignSelf: "center",
-              cursor: "ns-resize",
-            }}
-          />
+          {resolvedDrawerMode !== "full" && (
+            <Box
+              onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
+              onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientY)}
+              onMouseDown={(e) => handleDragStart(e.clientY)}
+              onMouseUp={(e) => handleDragEnd(e.clientY)}
+              style={{
+                width: 42,
+                height: 4,
+                borderRadius: 999,
+                background: "var(--mantine-color-gray-4)",
+                alignSelf: "center",
+                cursor: "ns-resize",
+              }}
+            />
+          )}
           <Group justify="space-between" align="center" wrap="nowrap">
             <Box>
               <Text fw={700}>Ask Waldi</Text>
               <Text size="xs" c="dimmed">
-                Your AI financial assistant
+                Your AI money buddy
               </Text>
             </Box>
             <Group gap={4} wrap="nowrap">
@@ -314,7 +302,7 @@ export function FinancialAssistantDrawer({
                 variant="subtle"
                 color="gray"
                 aria-label="Close assistant"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 <X size={16} />
               </ActionIcon>
@@ -355,9 +343,25 @@ export function FinancialAssistantDrawer({
           <Stack gap="sm" px="md" py="md">
             {messages.length === 0 && (
               <Stack gap="sm">
-                {(insightsMutation.isPending
-                  ? FALLBACK_STARTER_INSIGHTS
-                  : starterInsights
+                {starterInsightsQuery.isLoading &&
+                  [0, 1, 2].map((index) => (
+                    <Paper
+                      key={index}
+                      p="sm"
+                      radius="md"
+                      withBorder
+                      style={{ borderColor: "var(--mantine-color-green-2)" }}
+                    >
+                      <Stack gap="xs">
+                        <Skeleton height={12} radius="xl" width="52%" />
+                        <Skeleton height={10} radius="xl" />
+                        <Skeleton height={10} radius="xl" width="68%" />
+                      </Stack>
+                    </Paper>
+                  ))}
+                {!starterInsightsQuery.isLoading && (starterInsightsQuery.data?.length
+                  ? starterInsightsQuery.data
+                  : FALLBACK_STARTER_INSIGHTS
                 ).map((insight) => (
                   <Paper
                     key={insight.id}
@@ -391,20 +395,19 @@ export function FinancialAssistantDrawer({
                     </Stack>
                   </Paper>
                 ))}
-                {insightsMutation.isPending && (
+                {starterInsightsQuery.isError && (
                   <Paper
                     p="sm"
                     radius="md"
                     withBorder
-                    style={{ borderColor: "var(--mantine-color-green-2)" }}
+                    style={{
+                      borderColor: "var(--mantine-color-yellow-4)",
+                      background: "var(--mantine-color-yellow-0)",
+                    }}
                   >
-                    <Stack gap="xs">
-                      <Text size="sm" c="dimmed">
-                        Preparing personalized insights...
-                      </Text>
-                      <Skeleton height={10} radius="xl" />
-                      <Skeleton height={10} radius="xl" width="65%" />
-                    </Stack>
+                    <Text size="sm" c="yellow.9">
+                      Personalized cards are temporarily unavailable.
+                    </Text>
                   </Paper>
                 )}
               </Stack>

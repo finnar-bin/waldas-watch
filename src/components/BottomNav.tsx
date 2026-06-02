@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Box, Flex, Text, UnstyledButton } from "@mantine/core";
 import {
-  Bot,
   Home,
   LayoutDashboard,
   Plus,
   Settings,
+  Sparkles,
 } from "lucide-react";
 
 interface NavItemProps {
@@ -139,13 +139,7 @@ export function BottomNav({
           exactPath={false}
           exactSearch={false}
         />
-        <NavItem
-          to="/sheets/$sheetId/settings"
-          params={params}
-          icon={Settings}
-          label="Settings"
-          exactPath={false}
-        />
+        <AddButton sheetId={sheetId} />
         <UnstyledButton
           onClick={onOpenAssistant}
           style={{
@@ -158,7 +152,7 @@ export function BottomNav({
             flex: 1,
           }}
         >
-          <Bot
+          <Sparkles
             size={22}
             color={
               assistantOpened
@@ -175,7 +169,13 @@ export function BottomNav({
             Waldi
           </Text>
         </UnstyledButton>
-        <AddButton sheetId={sheetId} />
+        <NavItem
+          to="/sheets/$sheetId/settings"
+          params={params}
+          icon={Settings}
+          label="Settings"
+          exactPath={false}
+        />
       </Flex>
     </Box>
   );
