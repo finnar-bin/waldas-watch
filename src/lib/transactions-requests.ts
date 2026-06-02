@@ -1,4 +1,5 @@
 import { supabase } from './supabase-client'
+import { formatLocalDate } from '@/utils/format-local-date'
 
 export type TransactionDetail = {
   id: string
@@ -183,12 +184,12 @@ export async function getCurrentMonthSheetTotals(
   sheetId: string,
 ): Promise<MonthlySheetTotals> {
   const now = new Date()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    .toISOString()
-    .slice(0, 10)
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    .toISOString()
-    .slice(0, 10)
+  const monthStart = formatLocalDate(
+    new Date(now.getFullYear(), now.getMonth(), 1),
+  )
+  const monthEnd = formatLocalDate(
+    new Date(now.getFullYear(), now.getMonth() + 1, 0),
+  )
 
   const [{ data, error }, { data: categories, error: categoriesError }] =
     await Promise.all([
@@ -348,12 +349,12 @@ export async function getCurrentMonthSheetCategoryTotals(
   sheetId: string,
 ): Promise<MonthlySheetCategoryTotals> {
   const now = new Date()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    .toISOString()
-    .slice(0, 10)
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    .toISOString()
-    .slice(0, 10)
+  const monthStart = formatLocalDate(
+    new Date(now.getFullYear(), now.getMonth(), 1),
+  )
+  const monthEnd = formatLocalDate(
+    new Date(now.getFullYear(), now.getMonth() + 1, 0),
+  )
 
   const { data, error } = await supabase
     .from('transactions')
