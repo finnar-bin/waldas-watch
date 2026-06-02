@@ -1,7 +1,7 @@
 {
   "name": "waldas-watch",
   "private": true,
-  "version": "1.1.2",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "db:link:dev": "dotenv -e .env.development -- sh -c 'npx supabase link --project-ref $SUPABASE_PROJECT_REF_DEV'",
     "db:link:prod": "dotenv -e .env.production -- sh -c 'npx supabase link --project-ref $SUPABASE_PROJECT_REF_PROD'",
-    "db:push:dev": "dotenv -e .env.development -- sh -c 'npx supabase db push'",
-    "db:push:prod": "dotenv -e .env.production -- sh -c 'npx supabase db push'",
+    "db:push:dev": "npm run db:link:dev && dotenv -e .env.development -- sh -c 'npx supabase db push'",
+    "db:push:prod": "npm run db:link:prod && dotenv -e .env.production -- sh -c 'npx supabase db push'",
     "db:list": "npx supabase migration list",
     "functions:deploy:dev": "dotenv -e .env.development -- sh -c 'npx supabase functions deploy --project-ref $SUPABASE_PROJECT_REF_DEV'",
     "functions:deploy:prod": "dotenv -e .env.production -- sh -c 'npx supabase functions deploy --project-ref $SUPABASE_PROJECT_REF_PROD'"

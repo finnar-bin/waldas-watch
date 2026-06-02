@@ -58,6 +58,16 @@ This file defines coding preferences for AI assistants working in this repo.
 - Do not implement Phase 2 or Phase 3 behavior unless explicitly requested by the user.
 - Keep changes phase-scoped: avoid adding mutation queue/conflict logic while Phase 1 is active.
 
+## Supabase Migrations
+
+- Treat `supabase/.temp/project-ref` as mutable local CLI state, not as proof that an npm script is targeting the right project.
+- `supabase db push`, `supabase db query --linked`, and `supabase migration list` use the currently linked project. Loading `.env.development` or `.env.production` does not change the linked project by itself.
+- Before any `--linked` Supabase CLI command, link deliberately with `npm run db:link:dev` or `npm run db:link:prod`, or use a script that links first.
+- Prefer `npm run db:push:dev` and `npm run db:push:prod` over raw `supabase db push`; these scripts relink before pushing.
+- When checking whether a table is exposed through the Supabase REST/Data API, verify both Postgres metadata and the REST endpoint. A table can exist in Postgres while REST returns `PGRST205` if the migration was pushed to a different project or PostgREST has stale schema state.
+- For new tables in exposed schemas, explicitly grant the intended API roles. Do not rely on tables being automatically exposed to the Data API.
+- Keep dev and prod schema helpers aligned through migrations. If a helper such as `has_sheet_role` is used by RLS policies, make sure it exists in committed migrations and both environments before relying on it.
+
 ## Documentation
 
 - Follow and update `docs/state-management.md` for state patterns and boundaries.
