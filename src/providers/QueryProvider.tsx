@@ -20,11 +20,13 @@ const persister = createSyncStoragePersister({
   key: 'waldas-watch-query-cache',
 })
 
+const queryCacheBuster = `${__APP_VERSION__}-${__GIT_HASH__}`
+
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   return (
     <PersistQueryClientProvider
       client={queryClient}
-      persistOptions={{ persister }}
+      persistOptions={{ persister, buster: queryCacheBuster }}
     >
       {children}
     </PersistQueryClientProvider>
