@@ -173,6 +173,7 @@ export function FinancialAssistantDrawer({
     setSystemError(null);
     setLastRequest(null);
     setDrawerMode(null);
+    mutation.reset();
     touchStartY.current = null;
 
     void getWaldiChatThread(sheetId)
@@ -273,6 +274,7 @@ export function FinancialAssistantDrawer({
     setLastRequest(null);
     form.reset();
     setDrawerMode(shouldStayFullscreen ? "full" : null);
+    mutation.reset();
     void clearWaldiChatMessages(sheetId).catch(() => undefined);
     scrollViewportRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -480,32 +482,6 @@ export function FinancialAssistantDrawer({
                     </Text>
                   </Paper>
                 )}
-                <Group gap="xs" wrap="wrap">
-                  {QUICK_ACTIONS.map((action) => (
-                    <UnstyledButton
-                      key={action.key}
-                      disabled={mutation.isPending}
-                      onClick={() =>
-                        sendPrompt(action.prompt, "quick_action", action.key)
-                      }
-                      style={{
-                        border: "1px solid var(--mantine-color-gray-3)",
-                        borderRadius: 999,
-                        padding: "5px 10px",
-                        background: "var(--mantine-color-white)",
-                        color: "var(--mantine-color-gray-7)",
-                        fontSize: 12,
-                        maxWidth: "100%",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        opacity: mutation.isPending ? 0.55 : 1,
-                      }}
-                    >
-                      {action.label}
-                    </UnstyledButton>
-                  ))}
-                </Group>
               </Stack>
             )}
 
@@ -588,7 +564,7 @@ export function FinancialAssistantDrawer({
               </Paper>
             )}
 
-            {suggestedFollowUps.length > 0 && (
+            {messages.length > 0 && suggestedFollowUps.length > 0 && (
               <Group gap="xs" wrap="wrap">
                 {suggestedFollowUps.map((item) => (
                   <UnstyledButton
