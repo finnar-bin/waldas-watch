@@ -4,11 +4,6 @@ type PromptType = "quick_action" | "free_text" | "starter_insights";
 
 type Scope = "in_scope" | "out_of_scope";
 
-type ScopeDecision =
-  | { result: "allow"; reason: "finance_keyword" | "contextual_followup" }
-  | { result: "deny"; reason: "hard_block" | "obvious_non_finance" }
-  | { result: "uncertain"; reason: "ambiguous" };
-
 type RequestBody = {
   sheetId?: string;
   message?: string;
@@ -29,116 +24,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
-
-const FINANCE_TERMS = [
-  "budget",
-  "spend",
-  "spending",
-  "expense",
-  "expenses",
-  "income",
-  "savings",
-  "save",
-  "debt",
-  "loan",
-  "credit",
-  "cashflow",
-  "cash flow",
-  "invest",
-  "investment",
-  "stocks",
-  "mutual fund",
-  "etf",
-  "portfolio",
-  "retirement",
-  "gastos",
-  "sweldo",
-  "pera",
-  "ipon",
-  "subscription",
-  "subscriptions",
-  "recurring",
-  "bill",
-  "bills",
-  "utilities",
-  "category",
-  "categories",
-  "month",
-  "monthly",
-  "afford",
-  "trim",
-  "cut",
-];
-
-const HARD_BLOCK_TERMS = [
-  "homework",
-  "assignment",
-  "lyrics",
-  "recipe",
-  "movie",
-  "travel plan",
-  "programming",
-  "code bug",
-  "medical diagnosis",
-  "legal advice",
-  "relationship advice",
-  "politics",
-];
-
-const FOLLOW_UP_PATTERNS = [
-  /^(why|why not|how|how so)\??$/,
-  /^(explain|explain more|tell me more|show me more)\.?$/,
-  /^(what about|how about|compare|break it down|give me examples)\b/,
-  /\b(last month|next month|this month|that category|those expenses|that spending)\b/,
-  /\b(what should i do|what can i do|what now|next step)\b/,
-];
-
-const OBVIOUS_NON_FINANCE_PATTERNS = [
-  /\b(write|draft|compose) (a|an|the)?\s*(poem|story|essay|email|letter)\b/,
-  /\b(translate|summarize|rewrite|proofread)\b/,
-  /\b(plan|book|build) (a|an|the)?\s*(trip|vacation|itinerary)\b/,
-  /\b(make|tell) (me )?(a )?(joke|meme)\b/,
-];
-
-function normalizeMessage(message: string): string {
-  return message.toLowerCase().trim().replace(/\s+/g, " ");
-}
-
-function hasHardBlock(message: string): boolean {
-  const lower = normalizeMessage(message);
-  return HARD_BLOCK_TERMS.some((term) => lower.includes(term));
-}
-
-function hasFinanceKeyword(message: string): boolean {
-  const lower = normalizeMessage(message);
-  return FINANCE_TERMS.some((term) => lower.includes(term));
-}
-
-function isClearFollowUp(message: string): boolean {
-  const lower = normalizeMessage(message);
-  return FOLLOW_UP_PATTERNS.some((pattern) => pattern.test(lower));
-}
-
-function hasObviousNonFinanceIntent(message: string): boolean {
-  const lower = normalizeMessage(message);
-  return OBVIOUS_NON_FINANCE_PATTERNS.some((pattern) => pattern.test(lower));
-}
-
-function classifyScopeLocally(
-  message: string,
-  hasThreadContext: boolean,
-): ScopeDecision {
-  if (hasHardBlock(message)) return { result: "deny", reason: "hard_block" };
-  if (hasFinanceKeyword(message))
-    return { result: "allow", reason: "finance_keyword" };
-  if (hasThreadContext && isClearFollowUp(message)) {
-    return { result: "allow", reason: "contextual_followup" };
-  }
-  if (hasObviousNonFinanceIntent(message)) {
-    return { result: "deny", reason: "obvious_non_finance" };
-  }
-  return { result: "uncertain", reason: "ambiguous" };
-}
 
 function monthStart(date: Date): string {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
@@ -183,6 +68,7 @@ async function classifyScopeWithLlm(
   model: string,
   message: string,
   conversationSummary: string | null,
+  conversationMessages: ConversationMessage[],
 ): Promise<boolean> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -200,7 +86,9 @@ async function classifyScopeWithLlm(
           content: [
             "Classify whether a user message is related to personal finance in a budgeting app.",
             "Finance-related includes budgeting, spending, saving, debt, income, bills, affordability, subscriptions, and beginner investing.",
-            "Use the conversation summary only to resolve ambiguous follow-ups.",
+            "Messages may be written in any language, including Taglish. Judge meaning, not language.",
+            "Use the conversation summary and recent messages to resolve ambiguous follow-ups, pronouns, and references like 'it', 'that', 'like I said', or 'higher than usual'.",
+            "A follow-up is finance-related when it continues a prior budgeting or finance discussion, even if the current message does not contain finance keywords.",
             "Do not answer the user. Return JSON only with keys: isFinanceRelated, reason.",
           ].join(" "),
         },
@@ -209,6 +97,7 @@ async function classifyScopeWithLlm(
           content: JSON.stringify({
             message,
             conversationSummary,
+            recentMessages: conversationMessages.slice(-8),
           }),
         },
       ],
@@ -325,42 +214,29 @@ Deno.serve(async (req) => {
     let apiKey: string | null = null;
 
     if (promptType !== "starter_insights") {
-      const localScopeDecision = classifyScopeLocally(
+      apiKey = Deno.env.get("OPENAI_API_KEY");
+      if (!apiKey) {
+        return Response.json(
+          {
+            error: "AI is not configured on the server. Set OPENAI_API_KEY.",
+          },
+          { status: 500, headers: corsHeaders },
+        );
+      }
+
+      const isFinanceRelated = await classifyScopeWithLlm(
+        apiKey,
+        classifierModel,
         message,
-        !!conversationSummary || conversationMessages.length > 0,
+        conversationSummary,
+        conversationMessages,
       );
 
-      if (localScopeDecision.result === "deny") {
+      if (!isFinanceRelated) {
         return Response.json(buildOutOfScopeResponse(conversationSummary), {
           status: 200,
           headers: corsHeaders,
         });
-      }
-
-      if (localScopeDecision.result === "uncertain") {
-        apiKey = Deno.env.get("OPENAI_API_KEY");
-        if (!apiKey) {
-          return Response.json(
-            {
-              error: "AI is not configured on the server. Set OPENAI_API_KEY.",
-            },
-            { status: 500, headers: corsHeaders },
-          );
-        }
-
-        const isFinanceRelated = await classifyScopeWithLlm(
-          apiKey,
-          classifierModel,
-          message,
-          conversationSummary,
-        );
-
-        if (!isFinanceRelated) {
-          return Response.json(buildOutOfScopeResponse(conversationSummary), {
-            status: 200,
-            headers: corsHeaders,
-          });
-        }
       }
     }
 
@@ -584,7 +460,7 @@ Deno.serve(async (req) => {
     };
 
     const systemPrompt = [
-      "You are Walda AI, a playful but practical budgeting assistant for a Filipino-friendly app.",
+      "You are Waldi, a playful but practical budgeting AI assistant for a Filipino-friendly app.",
       "Respond in clear and concise English unless the user starts speaking in their own language.",
       "Response tone should be warm, friendly, casual and playful.",
       "Only answer finance and budgeting topics; if prompt is unrelated, refuse and redirect to finance.",
@@ -592,6 +468,7 @@ Deno.serve(async (req) => {
       "Do not give legal, medical, or tax directives. No guaranteed returns.",
       "Use provided context only; if data is missing, say so plainly.",
       "Use conversation summary and recent messages only to resolve follow-ups and user preferences.",
+      "Format answers in concise Markdown using short paragraphs and simple bullet or numbered lists when helpful. Avoid tables, headings, code blocks, and long essays.",
       "Return JSON only with keys: answer, suggestedFollowUps, scope, disclaimer, conversationSummary.",
       "conversationSummary must be a compact factual summary under 800 characters. Include durable user goals, constraints, preferences, and prior conclusions. Do not include sensitive raw transaction lists.",
     ].join(" ");

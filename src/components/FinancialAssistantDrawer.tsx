@@ -17,6 +17,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { PenSquare, Send, Sparkles, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import {
   QuickActionKey,
   FinancialAssistantResponse,
@@ -105,6 +106,42 @@ const LOADING_MESSAGES = [
   "Comparing previous months...",
   "Detecting unusual spending...",
 ];
+
+function WaldiMessageContent({ content }: { content: string }) {
+  return (
+    <ReactMarkdown
+      components={{
+        p: ({ children }) => (
+          <Text size="sm" mb={6}>
+            {children}
+          </Text>
+        ),
+        strong: ({ children }) => (
+          <Text component="span" fw={700}>
+            {children}
+          </Text>
+        ),
+        ul: ({ children }) => (
+          <Stack component="ul" gap={4} pl="md" my={0}>
+            {children}
+          </Stack>
+        ),
+        ol: ({ children }) => (
+          <Stack component="ol" gap={4} pl="md" my={0}>
+            {children}
+          </Stack>
+        ),
+        li: ({ children }) => (
+          <Text component="li" size="sm">
+            {children}
+          </Text>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+}
 
 interface FinancialAssistantDrawerProps {
   opened: boolean;
@@ -508,7 +545,11 @@ export function FinancialAssistantDrawer({
                   >
                     {message.role === "user" ? "You" : "Waldi insight"}
                   </Text>
-                  <Text size="sm">{message.content}</Text>
+                  {message.role === "assistant" ? (
+                    <WaldiMessageContent content={message.content} />
+                  ) : (
+                    <Text size="sm">{message.content}</Text>
+                  )}
                   {message.disclaimer && (
                     <Text size="xs" c="dimmed">
                       {message.disclaimer}
