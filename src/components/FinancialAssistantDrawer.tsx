@@ -23,11 +23,6 @@ import {
   FinancialAssistantResponse,
   StarterInsight,
 } from "@/lib/ai-assistant-requests";
-import {
-  clearWaldiChatMessages,
-  getWaldiChatThread,
-  saveWaldiChatMessages,
-} from "@/lib/waldi-chat-storage";
 import { useFinancialAssistantMutation } from "@/queries/use-financial-assistant-mutation";
 import { useFinancialAssistantStarterInsightsQuery } from "@/queries/use-financial-assistant-starter-insights-query";
 
@@ -102,9 +97,14 @@ const FALLBACK_STARTER_INSIGHTS: StarterInsight[] = [
 ];
 
 const LOADING_MESSAGES = [
-  "Analyzing transactions...",
-  "Comparing previous months...",
-  "Detecting unusual spending...",
+  "Sifting through your gastos...",
+  "Checking where the money went...",
+  "Comparing this month with the last one...",
+  "Spotting sneaky budget leaks...",
+  "Balancing the numbers like a pro...",
+  "Looking for the usual pera troublemakers...",
+  "Crunching the spending receipts...",
+  "Putting the budget puzzle together...",
 ];
 
 function WaldiMessageContent({ content }: { content: string }) {
@@ -159,8 +159,6 @@ export function FinancialAssistantDrawer({
   const [conversationSummary, setConversationSummary] = useState<string | null>(
     null,
   );
-  const [hasLoadedPersistedThread, setHasLoadedPersistedThread] =
-    useState(false);
   const [drawerMode, setDrawerMode] = useState<"partial" | "full" | null>(null);
   const [systemError, setSystemError] = useState<string | null>(null);
   const [lastRequest, setLastRequest] = useState<{
@@ -202,9 +200,6 @@ export function FinancialAssistantDrawer({
   }, [mutation.data]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    setHasLoadedPersistedThread(false);
     setMessages([]);
     setConversationSummary(null);
     setSystemError(null);
@@ -212,38 +207,26 @@ export function FinancialAssistantDrawer({
     setDrawerMode(null);
     mutation.reset();
     touchStartY.current = null;
-
-    void getWaldiChatThread(sheetId)
-      .then((thread) => {
-        if (cancelled) return;
-        setMessages(thread.messages);
-        setConversationSummary(thread.conversationSummary);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setMessages([]);
-        setConversationSummary(null);
-      })
-      .finally(() => {
-        if (cancelled) return;
-        setHasLoadedPersistedThread(true);
-      });
-
-    return () => {
-      cancelled = true;
-    };
   }, [sheetId]);
 
   useEffect(() => {
-    if (!hasLoadedPersistedThread) return;
-    if (messages.length === 0) {
-      void clearWaldiChatMessages(sheetId).catch(() => undefined);
-      return;
-    }
-    void saveWaldiChatMessages(sheetId, messages, conversationSummary).catch(
-      () => undefined,
-    );
-  }, [conversationSummary, hasLoadedPersistedThread, messages, sheetId]);
+    if (!opened || messages.length === 0) return;
+
+    requestAnimationFrame(() => {
+      const viewport = scrollViewportRef.current;
+      if (!viewport) return;
+
+      viewport.scrollTo({
+        top: viewport.scrollHeight,
+        behavior: "smooth",
+      });
+    });
+  }, [
+    messages.length,
+    mutation.isPending,
+    opened,
+    suggestedFollowUps.length,
+  ]);
 
   async function sendPrompt(
     prompt: string,
@@ -315,7 +298,6 @@ export function FinancialAssistantDrawer({
     form.reset();
     setDrawerMode(shouldStayFullscreen ? "full" : null);
     mutation.reset();
-    void clearWaldiChatMessages(sheetId).catch(() => undefined);
     scrollViewportRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
