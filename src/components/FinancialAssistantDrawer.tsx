@@ -212,6 +212,8 @@ export function FinancialAssistantDrawer({
     promptType: "quick_action" | "free_text",
     quickActionKey?: QuickActionKey,
   ) {
+    if (mutation.isPending) return;
+
     const trimmed = prompt.trim();
     if (!trimmed) return;
 
@@ -377,6 +379,7 @@ export function FinancialAssistantDrawer({
             {QUICK_ACTIONS.map((action) => (
               <UnstyledButton
                 key={action.key}
+                disabled={mutation.isPending}
                 onClick={() =>
                   sendPrompt(action.prompt, "quick_action", action.key)
                 }
@@ -389,6 +392,7 @@ export function FinancialAssistantDrawer({
                   color: "var(--mantine-color-gray-8)",
                   fontSize: 12,
                   lineHeight: 1.2,
+                  opacity: mutation.isPending ? 0.55 : 1,
                 }}
               >
                 {action.label}
@@ -480,6 +484,7 @@ export function FinancialAssistantDrawer({
                   {QUICK_ACTIONS.map((action) => (
                     <UnstyledButton
                       key={action.key}
+                      disabled={mutation.isPending}
                       onClick={() =>
                         sendPrompt(action.prompt, "quick_action", action.key)
                       }
@@ -494,6 +499,7 @@ export function FinancialAssistantDrawer({
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
+                        opacity: mutation.isPending ? 0.55 : 1,
                       }}
                     >
                       {action.label}
@@ -587,6 +593,7 @@ export function FinancialAssistantDrawer({
                 {suggestedFollowUps.map((item) => (
                   <UnstyledButton
                     key={item}
+                    disabled={mutation.isPending}
                     onClick={() => sendPrompt(item, "free_text")}
                     style={{
                       border: "1px solid var(--mantine-color-gray-3)",
@@ -599,6 +606,7 @@ export function FinancialAssistantDrawer({
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
+                      opacity: mutation.isPending ? 0.55 : 1,
                     }}
                   >
                     {item}
@@ -617,6 +625,7 @@ export function FinancialAssistantDrawer({
           }}
           onSubmit={form.onSubmit(async (values, event) => {
             event?.preventDefault();
+            if (mutation.isPending) return;
             const prompt = values.question.trim();
             await sendPrompt(prompt, "free_text");
             form.reset();
@@ -636,6 +645,7 @@ export function FinancialAssistantDrawer({
               radius="xl"
               color="teal"
               variant="filled"
+              disabled={mutation.isPending}
               loading={mutation.isPending}
             >
               <Send size={16} />

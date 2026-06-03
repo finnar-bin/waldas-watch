@@ -75,6 +75,13 @@ function toCurrency(value: number): string {
   return `P${Math.round(value).toLocaleString()}`
 }
 
+function buildRateLimitResponse(retryAfterSeconds: number) {
+  return {
+    error: 'Rate limit exceeded',
+    retryAfterSeconds,
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -301,6 +308,34 @@ Deno.serve(async (req) => {
       return Response.json(
         { error: 'AI is not configured on the server. Set OPENAI_API_KEY.' },
         { status: 500, headers: corsHeaders },
+      )
+    }
+
+    const { data: rateLimitRows, error: rateLimitError } = await admin.rpc(
+      'check_ai_rate_limit',
+      {
+        target_user_id: user.id,
+        max_requests: 10,
+        window_seconds: 60,
+      },
+    )
+
+    if (rateLimitError) throw rateLimitError
+
+    const rateLimit = rateLimitRows?.[0] as
+      | { allowed: boolean; retry_after_seconds: number }
+      | undefined
+
+    if (!rateLimit?.allowed) {
+      return Response.json(
+        buildRateLimitResponse(rateLimit?.retry_after_seconds ?? 60),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            'Retry-After': String(rateLimit?.retry_after_seconds ?? 60),
+          },
+        },
       )
     }
 

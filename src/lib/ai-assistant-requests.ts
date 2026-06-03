@@ -67,7 +67,13 @@ export async function askFinancialAssistant(
     },
   )
 
-  if (error) throw error
+  if (error) {
+    const maybeContext = (error as { context?: unknown }).context
+    if (maybeContext instanceof Response && maybeContext.status === 429) {
+      throw new Error('Waldi needs a short breather. Try again in a moment.')
+    }
+    throw error
+  }
   if (!data) throw new Error('No response from assistant. Baka nag-merienda muna si AI.')
   return data
 }
