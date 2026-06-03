@@ -23,6 +23,8 @@ export interface FinancialAssistantRequest {
   promptType: FinancialAssistantPromptType
   quickActionKey?: QuickActionKey | null
   contextWindowMonths?: number
+  conversationMessages?: FinancialAssistantConversationMessage[]
+  conversationSummary?: string | null
 }
 
 export interface FinancialAssistantResponse {
@@ -30,7 +32,13 @@ export interface FinancialAssistantResponse {
   suggestedFollowUps: string[]
   scope: 'in_scope' | 'out_of_scope'
   disclaimer: string | null
+  conversationSummary?: string | null
   starterInsights?: StarterInsight[]
+}
+
+export interface FinancialAssistantConversationMessage {
+  role: 'user' | 'assistant'
+  content: string
 }
 
 export interface StarterInsight {
@@ -53,6 +61,8 @@ export async function askFinancialAssistant(
         promptType: input.promptType,
         quickActionKey: input.quickActionKey ?? null,
         contextWindowMonths: input.contextWindowMonths ?? 6,
+        conversationMessages: input.conversationMessages ?? [],
+        conversationSummary: input.conversationSummary ?? null,
       },
     },
   )

@@ -10,6 +10,13 @@ type RequestBody = {
   promptType?: PromptType
   quickActionKey?: string | null
   contextWindowMonths?: number
+  conversationMessages?: ConversationMessage[]
+  conversationSummary?: string | null
+}
+
+type ConversationMessage = {
+  role?: 'user' | 'assistant'
+  content?: string
 }
 
 const corsHeaders = {
@@ -21,6 +28,8 @@ const FINANCE_TERMS = [
   'budget', 'spend', 'spending', 'expense', 'expenses', 'income', 'savings', 'save',
   'debt', 'loan', 'credit', 'cashflow', 'cash flow', 'invest', 'investment', 'stocks',
   'mutual fund', 'etf', 'portfolio', 'retirement', 'gastos', 'sweldo', 'pera', 'ipon',
+  'subscription', 'subscriptions', 'recurring', 'bill', 'bills', 'utilities', 'category',
+  'categories', 'month', 'monthly', 'afford', 'trim', 'cut',
 ]
 
 const HARD_BLOCK_TERMS = [
@@ -28,9 +37,14 @@ const HARD_BLOCK_TERMS = [
   'code bug', 'medical diagnosis', 'legal advice', 'relationship advice', 'politics',
 ]
 
+function hasHardBlock(message: string): boolean {
+  const lower = message.toLowerCase()
+  return HARD_BLOCK_TERMS.some((term) => lower.includes(term))
+}
+
 function isFinanceScoped(message: string): boolean {
   const lower = message.toLowerCase()
-  if (HARD_BLOCK_TERMS.some((term) => lower.includes(term))) return false
+  if (hasHardBlock(message)) return false
   return FINANCE_TERMS.some((term) => lower.includes(term))
 }
 
@@ -42,7 +56,7 @@ function monthEnd(date: Date): string {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).toISOString().slice(0, 10)
 }
 
-function buildOutOfScopeResponse() {
+function buildOutOfScopeResponse(conversationSummary: string | null) {
   return {
     answer:
       'I can only help with budgeting and finance questions. Try asking about your spending trend, savings, debt plan, or beginner investment steps.',
@@ -53,6 +67,7 @@ function buildOutOfScopeResponse() {
     ],
     scope: 'out_of_scope' as const,
     disclaimer: null,
+    conversationSummary,
   }
 }
 
@@ -91,6 +106,15 @@ Deno.serve(async (req) => {
     const promptType = body.promptType ?? 'free_text'
     const message = body.message?.trim() ?? ''
     const contextWindowMonths = Math.min(Math.max(body.contextWindowMonths ?? 6, 1), 12)
+    const conversationSummary = (body.conversationSummary ?? null)?.slice(0, 2000) ?? null
+    const conversationMessages = (body.conversationMessages ?? [])
+      .filter((item) => item.role === 'user' || item.role === 'assistant')
+      .filter((item) => typeof item.content === 'string' && item.content.trim().length > 0)
+      .slice(-20)
+      .map((item) => ({
+        role: item.role!,
+        content: item.content!.trim().slice(0, 1000),
+      }))
 
     if (!sheetId) {
       return Response.json({ error: 'Missing required fields' }, { status: 400, headers: corsHeaders })
@@ -116,8 +140,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403, headers: corsHeaders })
     }
 
-    if (promptType !== 'starter_insights' && !isFinanceScoped(message)) {
-      return Response.json(buildOutOfScopeResponse(), { status: 200, headers: corsHeaders })
+    if (
+      promptType !== 'starter_insights' &&
+      (hasHardBlock(message) || (!isFinanceScoped(message) && !conversationSummary && conversationMessages.length === 0))
+    ) {
+      return Response.json(buildOutOfScopeResponse(conversationSummary), { status: 200, headers: corsHeaders })
     }
 
     const now = new Date()
@@ -251,7 +278,7 @@ Deno.serve(async (req) => {
             ? `You have ${(recurring?.length ?? 0)} recurring charges currently active.`
             : 'No recurring charges detected yet. Add one to track subscriptions.',
         actionLabel: 'Review',
-        actionPrompt: 'Review my recurring subscriptions and suggest what to keep or cut.',
+        actionPrompt: 'Review my recurring subscription expenses and suggest what to keep or cut from my budget.',
       },
     ]
 
@@ -295,16 +322,22 @@ Deno.serve(async (req) => {
       'Allowed: budgeting, spending, savings, debt planning, and beginner investment tips.',
       'Do not give legal, medical, or tax directives. No guaranteed returns.',
       'Use provided context only; if data is missing, say so plainly.',
-      'Return JSON only with keys: answer, suggestedFollowUps, scope, disclaimer.',
+      'Use conversation summary and recent messages only to resolve follow-ups and user preferences.',
+      'Return JSON only with keys: answer, suggestedFollowUps, scope, disclaimer, conversationSummary.',
+      'conversationSummary must be a compact factual summary under 800 characters. Include durable user goals, constraints, preferences, and prior conclusions. Do not include sensitive raw transaction lists.',
     ].join(' ')
 
     const userPrompt = JSON.stringify({
       userMessage: message,
+      conversationSummary,
+      recentConversationMessages: conversationMessages,
       context,
       outputRules: {
         scope: 'must be in_scope unless unrelated topic',
         followUpsCount: 3,
         disclaimer: 'required when investment advice appears, otherwise null',
+        conversationSummary:
+          'update the previous summary using recent messages and this response; keep it concise and factual',
       },
     })
 
@@ -339,6 +372,7 @@ Deno.serve(async (req) => {
       suggestedFollowUps?: string[]
       scope?: Scope
       disclaimer?: string | null
+      conversationSummary?: string | null
     }
 
     const response = {
@@ -352,6 +386,10 @@ Deno.serve(async (req) => {
           ],
       scope: parsed.scope === 'out_of_scope' ? 'out_of_scope' : 'in_scope',
       disclaimer: parsed.disclaimer ?? null,
+      conversationSummary:
+        typeof parsed.conversationSummary === 'string'
+          ? parsed.conversationSummary.slice(0, 2000)
+          : conversationSummary,
     }
 
     return Response.json(response, { status: 200, headers: corsHeaders })

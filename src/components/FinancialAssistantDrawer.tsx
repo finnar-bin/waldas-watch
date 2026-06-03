@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Box,
@@ -22,6 +22,11 @@ import {
   FinancialAssistantResponse,
   StarterInsight,
 } from "@/lib/ai-assistant-requests";
+import {
+  clearWaldiChatMessages,
+  getWaldiChatThread,
+  saveWaldiChatMessages,
+} from "@/lib/waldi-chat-storage";
 import { useFinancialAssistantMutation } from "@/queries/use-financial-assistant-mutation";
 import { useFinancialAssistantStarterInsightsQuery } from "@/queries/use-financial-assistant-starter-insights-query";
 
@@ -65,7 +70,8 @@ const QUICK_ACTIONS: QuickAction[] = [
   {
     key: "recurring_audit",
     label: "Subscriptions",
-    prompt: "Review my recurring subscriptions and tell me what to trim.",
+    prompt:
+      "Review my recurring subscription expenses and tell me what to trim from my budget.",
   },
 ];
 
@@ -90,7 +96,7 @@ const FALLBACK_STARTER_INSIGHTS: StarterInsight[] = [
     body: "Look for subscriptions and repeat expenses that may be worth trimming.",
     actionLabel: "Review",
     actionPrompt:
-      "Review recurring subscriptions and suggest what to keep or cut.",
+      "Review recurring subscription expenses and suggest what to keep or cut from my budget.",
   },
 ];
 
@@ -113,6 +119,11 @@ export function FinancialAssistantDrawer({
 }: FinancialAssistantDrawerProps) {
   const mutation = useFinancialAssistantMutation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversationSummary, setConversationSummary] = useState<string | null>(
+    null,
+  );
+  const [hasLoadedPersistedThread, setHasLoadedPersistedThread] =
+    useState(false);
   const [drawerMode, setDrawerMode] = useState<"partial" | "full" | null>(null);
   const [systemError, setSystemError] = useState<string | null>(null);
   const [lastRequest, setLastRequest] = useState<{
@@ -153,6 +164,49 @@ export function FinancialAssistantDrawer({
     return mutation.data.suggestedFollowUps.slice(0, 3);
   }, [mutation.data]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    setHasLoadedPersistedThread(false);
+    setMessages([]);
+    setConversationSummary(null);
+    setSystemError(null);
+    setLastRequest(null);
+    setDrawerMode(null);
+    touchStartY.current = null;
+
+    void getWaldiChatThread(sheetId)
+      .then((thread) => {
+        if (cancelled) return;
+        setMessages(thread.messages);
+        setConversationSummary(thread.conversationSummary);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setMessages([]);
+        setConversationSummary(null);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setHasLoadedPersistedThread(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sheetId]);
+
+  useEffect(() => {
+    if (!hasLoadedPersistedThread) return;
+    if (messages.length === 0) {
+      void clearWaldiChatMessages(sheetId).catch(() => undefined);
+      return;
+    }
+    void saveWaldiChatMessages(sheetId, messages, conversationSummary).catch(
+      () => undefined,
+    );
+  }, [conversationSummary, hasLoadedPersistedThread, messages, sheetId]);
+
   async function sendPrompt(
     prompt: string,
     promptType: "quick_action" | "free_text",
@@ -167,6 +221,11 @@ export function FinancialAssistantDrawer({
       role: "user",
       content: trimmed,
     };
+    const rollingMessages = messages.slice(-20).map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+
     setMessages((prev) => [...prev, userMessage]);
     setLastRequest({ prompt: trimmed, promptType, quickActionKey });
 
@@ -177,6 +236,8 @@ export function FinancialAssistantDrawer({
         promptType,
         quickActionKey: quickActionKey ?? null,
         contextWindowMonths: 6,
+        conversationMessages: rollingMessages,
+        conversationSummary,
       });
 
       const assistantMessage: ChatMessage = {
@@ -186,6 +247,7 @@ export function FinancialAssistantDrawer({
         scope: response.scope,
         disclaimer: response.disclaimer,
       };
+      setConversationSummary(response.conversationSummary ?? conversationSummary);
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
       setSystemError("Couldn't analyze your finances right now.");
@@ -202,11 +264,14 @@ export function FinancialAssistantDrawer({
   }
 
   function handleNewChat() {
+    const shouldStayFullscreen = resolvedDrawerMode === "full";
     setMessages([]);
+    setConversationSummary(null);
     setSystemError(null);
     setLastRequest(null);
     form.reset();
-    setDrawerMode(null);
+    setDrawerMode(shouldStayFullscreen ? "full" : null);
+    void clearWaldiChatMessages(sheetId).catch(() => undefined);
     scrollViewportRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -240,7 +305,7 @@ export function FinancialAssistantDrawer({
       onClose={handleClose}
       withCloseButton={false}
       position="bottom"
-      size={resolvedDrawerMode === "full" ? "100dvh" : "65dvh"}
+      size={resolvedDrawerMode === "full" ? "100dvh" : "75dvh"}
       transitionProps={{ transition: "slide-up", duration: 220 }}
       overlayProps={{ backgroundOpacity: 0.14, blur: 0 }}
       styles={{
@@ -359,42 +424,43 @@ export function FinancialAssistantDrawer({
                       </Stack>
                     </Paper>
                   ))}
-                {!starterInsightsQuery.isLoading && (starterInsightsQuery.data?.length
-                  ? starterInsightsQuery.data
-                  : FALLBACK_STARTER_INSIGHTS
-                ).map((insight) => (
-                  <Paper
-                    key={insight.id}
-                    p="sm"
-                    radius="md"
-                    withBorder
-                    style={{
-                      borderColor: "var(--mantine-color-green-2)",
-                      background: "var(--mantine-color-green-0)",
-                    }}
-                  >
-                    <Stack gap={4}>
-                      <Text fw={600} size="sm">
-                        {insight.title}
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        {insight.body}
-                      </Text>
-                      <Button
-                        variant="subtle"
-                        color="gray"
-                        size="compact-sm"
-                        leftSection={<Sparkles size={14} />}
-                        onClick={() =>
-                          sendPrompt(insight.actionPrompt, "quick_action")
-                        }
-                        style={{ alignSelf: "flex-start" }}
-                      >
-                        {insight.actionLabel}
-                      </Button>
-                    </Stack>
-                  </Paper>
-                ))}
+                {!starterInsightsQuery.isLoading &&
+                  (starterInsightsQuery.data?.length
+                    ? starterInsightsQuery.data
+                    : FALLBACK_STARTER_INSIGHTS
+                  ).map((insight) => (
+                    <Paper
+                      key={insight.id}
+                      p="sm"
+                      radius="md"
+                      withBorder
+                      style={{
+                        borderColor: "var(--mantine-color-teal-2)",
+                        background: "var(--mantine-color-teal-0)",
+                      }}
+                    >
+                      <Stack gap={4}>
+                        <Text fw={700} size="sm" c="gray.9">
+                          {insight.title}
+                        </Text>
+                        <Text size="sm" c="gray.7">
+                          {insight.body}
+                        </Text>
+                        <Button
+                          variant="subtle"
+                          color="gray"
+                          size="compact-sm"
+                          leftSection={<Sparkles size={14} />}
+                          onClick={() =>
+                            sendPrompt(insight.actionPrompt, "quick_action")
+                          }
+                          style={{ alignSelf: "flex-start" }}
+                        >
+                          {insight.actionLabel}
+                        </Button>
+                      </Stack>
+                    </Paper>
+                  ))}
                 {starterInsightsQuery.isError && (
                   <Paper
                     p="sm"
@@ -410,6 +476,30 @@ export function FinancialAssistantDrawer({
                     </Text>
                   </Paper>
                 )}
+                <Group gap="xs" wrap="wrap">
+                  {QUICK_ACTIONS.map((action) => (
+                    <UnstyledButton
+                      key={action.key}
+                      onClick={() =>
+                        sendPrompt(action.prompt, "quick_action", action.key)
+                      }
+                      style={{
+                        border: "1px solid var(--mantine-color-gray-3)",
+                        borderRadius: 999,
+                        padding: "5px 10px",
+                        background: "var(--mantine-color-white)",
+                        color: "var(--mantine-color-gray-7)",
+                        fontSize: 12,
+                        maxWidth: "100%",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {action.label}
+                    </UnstyledButton>
+                  ))}
+                </Group>
               </Stack>
             )}
 
@@ -419,13 +509,22 @@ export function FinancialAssistantDrawer({
                 p="sm"
                 radius="md"
                 withBorder
-                style={{ borderColor: "var(--mantine-color-gray-3)" }}
+                style={
+                  message.role === "user"
+                    ? {
+                        borderColor: "var(--mantine-color-teal-2)",
+                        background: "var(--mantine-color-teal-0)",
+                      }
+                    : { borderColor: "var(--mantine-color-gray-3)" }
+                }
               >
                 <Stack gap={4}>
-                  <Text size="xs" c="dimmed" fw={600}>
-                    {message.role === "user"
-                      ? "Your question"
-                      : "Waldi insight"}
+                  <Text
+                    size="xs"
+                    c={message.role === "user" ? "teal.8" : "dimmed"}
+                    fw={700}
+                  >
+                    {message.role === "user" ? "You" : "Waldi insight"}
                   </Text>
                   <Text size="sm">{message.content}</Text>
                   {message.disclaimer && (
