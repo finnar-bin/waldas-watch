@@ -261,10 +261,13 @@ export function FinancialAssistantDrawer({
       role: "user",
       content: trimmed,
     };
-    const rollingMessages = messages.slice(-20).map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
+    const rollingMessages = messages
+      .filter((message) => message.role === "user")
+      .slice(-2)
+      .map((message) => ({
+        role: message.role,
+        content: message.content,
+      }));
 
     setMessages((prev) => [...prev, userMessage]);
     setLastRequest({ prompt: trimmed, promptType, quickActionKey });
