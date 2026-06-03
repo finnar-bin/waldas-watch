@@ -15,6 +15,19 @@ A collaborative budget tracking Progressive Web App. Create shared budget sheets
 - **Offline-first** — All write operations are queued locally and synced when back online
 - **Installable PWA** — Add to home screen on Android and iOS for a native app experience
 
+## Waldi AI Assistant
+
+Waldi is the app's built-in AI money buddy, designed to stay inside the budgeting flow instead of feeling like a separate chat app.
+
+- **Bottom-nav entry** — Open Waldi from the bottom navigation without leaving the current sheet
+- **Bottom sheet UI** — Starts as a draggable sheet and expands when the conversation becomes active
+- **Starter insights** — Shows proactive finance cards and prompt chips for common budgeting questions
+- **Context-aware responses** — Uses recent conversation context and a rolling summary to keep follow-ups grounded
+- **Friendly scope control** — Redirects unrelated requests back to budgeting topics instead of answering random prompts
+- **Concise answers** — Returns short Markdown-formatted responses that read more like financial insight cards than support-chat paragraphs
+- **Session-based thread** — The chat stays in memory for the current session and resets with a new chat or refresh
+- **Rate limiting** — Protects the Edge Function from repeated sends while a response is still in flight
+
 ## Tech Stack
 
 | Layer | Technology |
