@@ -644,8 +644,9 @@ export function FinancialAssistantDrawer({
             event?.preventDefault();
             if (mutation.isPending) return;
             const prompt = values.question.trim();
+            if (!prompt) return;
+            form.setFieldValue("question", "");
             await sendPrompt(prompt, "free_text");
-            form.reset();
           })}
         >
           <Group align="center" wrap="nowrap">
