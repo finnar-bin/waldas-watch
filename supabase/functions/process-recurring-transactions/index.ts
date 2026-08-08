@@ -5,27 +5,44 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
-type RecurringFrequency = "daily" | "weekly" | "monthly" | "yearly";
+type RecurringFrequency = "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
 
-function computeNextProcessDate(current: Date, frequency: RecurringFrequency, dayOfMonth: number | null): string {
-  const next = new Date(current);
+// Mirrors src/utils/compute-next-process-date.ts — kept in sync manually since
+// this Deno function can't import from src/. Operates purely on "YYYY-MM-DD"
+// calendar dates via UTC arithmetic so the result never depends on server TZ.
+function computeNextProcessDate(
+  current: string,
+  frequency: RecurringFrequency,
+  dayOfMonth: number | null,
+  dayOfWeek: number | null,
+): string {
+  const [year, month, day] = current.split("-").map(Number);
+  const next = new Date(Date.UTC(year, month - 1, day));
 
   switch (frequency) {
     case "daily":
-      next.setDate(next.getDate() + 1);
+      next.setUTCDate(next.getUTCDate() + 1);
       break;
     case "weekly":
-      next.setDate(next.getDate() + 7);
+    case "biweekly": {
+      const period = frequency === "biweekly" ? 14 : 7;
+      if (dayOfWeek != null) {
+        const diff = (dayOfWeek - next.getUTCDay() + 7) % 7 || period;
+        next.setUTCDate(next.getUTCDate() + diff);
+      } else {
+        next.setUTCDate(next.getUTCDate() + period);
+      }
       break;
+    }
     case "monthly":
-      next.setMonth(next.getMonth() + 1);
+      next.setUTCMonth(next.getUTCMonth() + 1);
       if (dayOfMonth) {
-        const maxDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
-        next.setDate(Math.min(dayOfMonth, maxDay));
+        const maxDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
+        next.setUTCDate(Math.min(dayOfMonth, maxDay));
       }
       break;
     case "yearly":
-      next.setFullYear(next.getFullYear() + 1);
+      next.setUTCFullYear(next.getUTCFullYear() + 1);
       break;
   }
 
@@ -86,9 +103,10 @@ Deno.serve(async (req) => {
       }
 
       const nextDate = computeNextProcessDate(
-        new Date(rt.next_process_date),
+        rt.next_process_date,
         rt.frequency,
         rt.day_of_month,
+        rt.day_of_week,
       );
 
       const { error: updateError } = await admin

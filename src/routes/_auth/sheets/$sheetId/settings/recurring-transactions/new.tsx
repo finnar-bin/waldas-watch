@@ -18,19 +18,17 @@ import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { useCreateRecurringTransactionMutation } from "@/queries/use-create-recurring-transaction-mutation";
 import type { RecurringFrequency } from "@/lib/recurring-transactions-requests";
+import {
+  FREQUENCY_OPTIONS,
+  WEEKDAY_OPTIONS,
+  WEEKLY_FREQUENCIES,
+} from "@/utils/recurring-frequency-options";
 
 export const Route = createFileRoute(
   "/_auth/sheets/$sheetId/settings/recurring-transactions/new",
 )({
   component: NewRecurringPage,
 });
-
-const FREQUENCY_OPTIONS = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-];
 
 interface FormValues {
   type: "income" | "expense";
@@ -39,6 +37,7 @@ interface FormValues {
   amount: number | "";
   frequency: RecurringFrequency;
   dayOfMonth: number | "";
+  dayOfWeek: string;
   description: string;
 }
 
@@ -60,6 +59,7 @@ function NewRecurringPage() {
       amount: "",
       frequency: "monthly",
       dayOfMonth: "",
+      dayOfWeek: String(new Date().getDay()),
       description: "",
     },
     validate: {
@@ -97,6 +97,9 @@ function NewRecurringPage() {
           values.frequency === "monthly" && values.dayOfMonth !== ""
             ? Number(values.dayOfMonth)
             : null,
+        dayOfWeek: WEEKLY_FREQUENCIES.includes(values.frequency)
+          ? Number(values.dayOfWeek)
+          : null,
       },
       {
         onSuccess: () =>
@@ -166,6 +169,14 @@ function NewRecurringPage() {
                 min={1}
                 max={31}
                 {...form.getInputProps("dayOfMonth")}
+              />
+            )}
+            {WEEKLY_FREQUENCIES.includes(form.values.frequency) && (
+              <Select
+                label="Day of week"
+                data={WEEKDAY_OPTIONS}
+                allowDeselect={false}
+                {...form.getInputProps("dayOfWeek")}
               />
             )}
             <Textarea

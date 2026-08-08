@@ -138,26 +138,50 @@ function SheetHomePage() {
               </Stack>
             </Group>
 
-            {(totals?.exceededBudgetTotal ?? 0) > 0 && (
+            <Stack gap={8}>
               <Box
                 px="sm"
                 py={6}
                 style={{
-                  background: "rgba(255, 80, 80, 0.15)",
+                  background: "rgba(255, 255, 255, 0.08)",
                   borderRadius: "var(--mantine-radius-md)",
-                  border: "1px solid rgba(255, 80, 80, 0.3)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
                 }}
               >
                 <Group justify="space-between">
                   <Text size="xs" style={{ opacity: 0.85 }}>
-                    Over budget
+                    Running Balance
                   </Text>
-                  <Text size="xs" fw={700} c="red.4">
-                    {formatCurrency(totals!.exceededBudgetTotal, currency)}
+                  <Text size="xs" fw={700}>
+                    {formatCurrency(
+                      (totals?.incomeTotal ?? 0) - (totals?.expenseTotal ?? 0),
+                      currency,
+                    )}
                   </Text>
                 </Group>
               </Box>
-            )}
+
+              {(totals?.exceededBudgetTotal ?? 0) > 0 && (
+                <Box
+                  px="sm"
+                  py={6}
+                  style={{
+                    background: "rgba(255, 80, 80, 0.15)",
+                    borderRadius: "var(--mantine-radius-md)",
+                    border: "1px solid rgba(255, 80, 80, 0.3)",
+                  }}
+                >
+                  <Group justify="space-between">
+                    <Text size="xs" style={{ opacity: 0.85 }}>
+                      Over budget
+                    </Text>
+                    <Text size="xs" fw={700} c="red.4">
+                      {formatCurrency(totals!.exceededBudgetTotal, currency)}
+                    </Text>
+                  </Group>
+                </Box>
+              )}
+            </Stack>
           </Stack>
         )}
       </Box>

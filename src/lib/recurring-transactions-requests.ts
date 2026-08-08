@@ -1,7 +1,7 @@
 import { supabase } from './supabase-client'
-import { computeNextProcessDate } from '@/utils/compute-next-process-date'
+import { computeNextProcessDate, todayDateString } from '@/utils/compute-next-process-date'
 
-export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
+export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly'
 
 export type RecurringTransactionItem = {
   id: string
@@ -10,6 +10,7 @@ export type RecurringTransactionItem = {
   description: string | null
   frequency: RecurringFrequency
   dayOfMonth: number | null
+  dayOfWeek: number | null
   nextProcessDate: string | null
   isActive: boolean
   categoryId: string
@@ -29,6 +30,7 @@ export type CreateRecurringTransactionInput = {
   description: string | null
   frequency: RecurringFrequency
   dayOfMonth: number | null
+  dayOfWeek: number | null
 }
 
 export type UpdateRecurringTransactionInput = {
@@ -39,6 +41,7 @@ export type UpdateRecurringTransactionInput = {
   description: string | null
   frequency: RecurringFrequency
   dayOfMonth: number | null
+  dayOfWeek: number | null
 }
 
 export async function getSheetRecurringTransactions(
@@ -47,7 +50,7 @@ export async function getSheetRecurringTransactions(
   const { data, error } = await supabase
     .from('recurring_transactions')
     .select(
-      'id, type, amount, description, frequency, day_of_month, next_process_date, is_active, category_id, payment_type_id, categories(name, icon), payment_types(name)',
+      'id, type, amount, description, frequency, day_of_month, day_of_week, next_process_date, is_active, category_id, payment_type_id, categories(name, icon), payment_types(name)',
     )
     .eq('sheet_id', sheetId)
     .order('created_at', { ascending: false })
@@ -65,6 +68,7 @@ export async function getSheetRecurringTransactions(
       description: row.description,
       frequency: row.frequency as RecurringFrequency,
       dayOfMonth: row.day_of_month,
+      dayOfWeek: row.day_of_week,
       nextProcessDate: row.next_process_date,
       isActive: row.is_active,
       categoryId: row.category_id,
@@ -80,9 +84,10 @@ export async function createRecurringTransaction(
   input: CreateRecurringTransactionInput,
 ): Promise<void> {
   const nextProcessDate = computeNextProcessDate(
-    new Date(),
+    todayDateString(),
     input.frequency,
     input.dayOfMonth,
+    input.dayOfWeek,
   )
 
   const { error } = await supabase.from('recurring_transactions').insert({
@@ -95,6 +100,7 @@ export async function createRecurringTransaction(
     description: input.description,
     frequency: input.frequency,
     day_of_month: input.dayOfMonth,
+    day_of_week: input.dayOfWeek,
     next_process_date: nextProcessDate,
     is_active: true,
   })
@@ -107,9 +113,10 @@ export async function updateRecurringTransaction(
   input: UpdateRecurringTransactionInput,
 ): Promise<void> {
   const nextProcessDate = computeNextProcessDate(
-    new Date(),
+    todayDateString(),
     input.frequency,
     input.dayOfMonth,
+    input.dayOfWeek,
   )
 
   const { error } = await supabase
@@ -122,6 +129,7 @@ export async function updateRecurringTransaction(
       description: input.description,
       frequency: input.frequency,
       day_of_month: input.dayOfMonth,
+      day_of_week: input.dayOfWeek,
       next_process_date: nextProcessDate,
     })
     .eq('id', id)
