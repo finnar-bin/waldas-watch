@@ -76,7 +76,7 @@ function SignupPage() {
       <Box w="100%" maw={400}>
         <Stack gap="xl">
           <Stack gap={4} align="center">
-            <img src="/favicon.svg" alt="Waldas Watch" width={64} height={64} />
+            <img src="/favicon.png" alt="Waldas Watch" width={64} height={64} />
             <Title order={1} size="h2">
               Create account
             </Title>
@@ -138,7 +138,12 @@ function SignupPage() {
 
           <Text ta="center" size="sm">
             Miss us already?{" "}
-            <Anchor component={Link} to="/login" search={{ redirectTo }} c="teal">
+            <Anchor
+              renderRoot={(props) => (
+                <Link to="/login" search={{ redirectTo }} {...props} />
+              )}
+              c="teal"
+            >
               Sign in.
             </Anchor>
           </Text>

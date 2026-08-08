@@ -137,7 +137,12 @@ function LoginPage() {
 
           <Text ta="center" size="sm">
             Still spending blind?{" "}
-            <Anchor component={Link} to="/signup" search={{ redirectTo }} c="teal">
+            <Anchor
+              renderRoot={(props) => (
+                <Link to="/signup" search={{ redirectTo }} {...props} />
+              )}
+              c="teal"
+            >
               Sign up.
             </Anchor>
           </Text>

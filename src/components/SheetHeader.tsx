@@ -28,7 +28,12 @@ export function SheetHeader({ sheetName, pageTitle }: SheetHeaderProps) {
         >
           {sheetName}
         </Text>
-        <Title order={3} fw={900} lh={1.3} truncate>
+        <Title
+          order={3}
+          fw={900}
+          lh={1.3}
+          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+        >
           {pageTitle}
         </Title>
       </div>
