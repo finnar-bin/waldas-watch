@@ -8,9 +8,10 @@ A collaborative budget tracking Progressive Web App. Create shared budget sheets
 
 - **Shared sheets** — Invite collaborators with owner, editor, or viewer roles
 - **Category budgets** — Set spending limits per category with visual progress tracking
+- **Budget carryover** — Opt in to roll an underspent category budget into the next month
 - **Expense & income tracking** — Log transactions with category, payment method, date, and description
 - **Monthly overview** — See how each category is trending for any month and year
-- **Recurring transactions** — Set up repeating income or expenses (salary, subscriptions, etc.)
+- **Recurring transactions** — Set up repeating income or expenses (salary, subscriptions, etc.), including weekly (with a specific day of week) and bi-weekly frequencies
 - **Multi-currency** — Each sheet has its own currency from 100+ supported options
 - **Offline-first** — All write operations are queued locally and synced when back online
 - **Installable PWA** — Add to home screen on Android and iOS for a native app experience

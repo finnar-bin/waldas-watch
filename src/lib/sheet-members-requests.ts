@@ -231,8 +231,8 @@ export async function getUserInvites(email: string): Promise<UserInvite[]> {
   if (error) throw error;
 
   return (data ?? []).map((row) => {
-    const sheet = row.sheets as { id: string; name: string } | null;
-    const inviter = row.inviter as { display_name: string | null; email: string | null } | null;
+    const sheet = row.sheets as unknown as { id: string; name: string } | null;
+    const inviter = row.inviter as unknown as { display_name: string | null; email: string | null } | null;
     return {
       id: row.id,
       sheetId: sheet?.id ?? "",
