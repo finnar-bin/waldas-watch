@@ -14,6 +14,7 @@ export function useUpdateCategoryMutation(sheetId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sheet-categories', sheetId] })
       queryClient.invalidateQueries({ queryKey: ['sheet-transaction-categories', sheetId] })
+      queryClient.invalidateQueries({ queryKey: ['sheet-category-budget-rollovers', sheetId] })
     },
   })
 

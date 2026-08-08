@@ -7,6 +7,7 @@ export type CategoryItem = {
   type: 'income' | 'expense'
   budget: number | null
   defaultAmount: number | null
+  createdAt: string
 }
 
 export type CreateCategoryInput = {
@@ -29,7 +30,7 @@ export type UpdateCategoryInput = {
 export async function getSheetCategories(sheetId: string): Promise<CategoryItem[]> {
   const { data, error } = await supabase
     .from('categories')
-    .select('id, name, icon, type, budget, default_amount')
+    .select('id, name, icon, type, budget, default_amount, created_at')
     .eq('sheet_id', sheetId)
     .order('name', { ascending: true })
 
@@ -42,6 +43,7 @@ export async function getSheetCategories(sheetId: string): Promise<CategoryItem[
     type: row.type as 'income' | 'expense',
     budget: row.budget != null ? Number(row.budget) : null,
     defaultAmount: row.default_amount != null ? Number(row.default_amount) : null,
+    createdAt: row.created_at,
   }))
 }
 
