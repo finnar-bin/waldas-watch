@@ -1,7 +1,7 @@
 import { supabase } from './supabase-client'
 import { computeNextProcessDate, todayDateString } from '@/utils/compute-next-process-date'
 
-export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
+export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly'
 
 export type RecurringTransactionItem = {
   id: string

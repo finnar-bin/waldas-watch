@@ -20,13 +20,16 @@ export function computeNextProcessDate(
       next.setUTCDate(next.getUTCDate() + 1);
       break;
     case "weekly":
+    case "biweekly": {
+      const period = frequency === "biweekly" ? 14 : 7;
       if (dayOfWeek != null) {
-        const diff = (dayOfWeek - next.getUTCDay() + 7) % 7 || 7;
+        const diff = (dayOfWeek - next.getUTCDay() + 7) % 7 || period;
         next.setUTCDate(next.getUTCDate() + diff);
       } else {
-        next.setUTCDate(next.getUTCDate() + 7);
+        next.setUTCDate(next.getUTCDate() + period);
       }
       break;
+    }
     case "monthly":
       next.setUTCMonth(next.getUTCMonth() + 1);
       if (dayOfMonth) {

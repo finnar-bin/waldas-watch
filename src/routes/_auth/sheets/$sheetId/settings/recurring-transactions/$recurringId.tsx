@@ -32,6 +32,7 @@ import type { RecurringFrequency } from "@/lib/recurring-transactions-requests";
 import {
   FREQUENCY_OPTIONS,
   WEEKDAY_OPTIONS,
+  WEEKLY_FREQUENCIES,
 } from "@/utils/recurring-frequency-options";
 
 export const Route = createFileRoute(
@@ -137,8 +138,9 @@ function EditRecurringPage() {
             values.frequency === "monthly" && values.dayOfMonth !== ""
               ? Number(values.dayOfMonth)
               : null,
-          dayOfWeek:
-            values.frequency === "weekly" ? Number(values.dayOfWeek) : null,
+          dayOfWeek: WEEKLY_FREQUENCIES.includes(values.frequency)
+            ? Number(values.dayOfWeek)
+            : null,
         },
       },
       {
@@ -272,7 +274,7 @@ function EditRecurringPage() {
                   {...form.getInputProps("dayOfMonth")}
                 />
               )}
-              {form.values.frequency === "weekly" && (
+              {WEEKLY_FREQUENCIES.includes(form.values.frequency) && (
                 <Select
                   label="Day of week"
                   data={WEEKDAY_OPTIONS}

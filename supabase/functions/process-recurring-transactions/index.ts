@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
-type RecurringFrequency = "daily" | "weekly" | "monthly" | "yearly";
+type RecurringFrequency = "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
 
 // Mirrors src/utils/compute-next-process-date.ts — kept in sync manually since
 // this Deno function can't import from src/. Operates purely on "YYYY-MM-DD"
@@ -24,13 +24,16 @@ function computeNextProcessDate(
       next.setUTCDate(next.getUTCDate() + 1);
       break;
     case "weekly":
+    case "biweekly": {
+      const period = frequency === "biweekly" ? 14 : 7;
       if (dayOfWeek != null) {
-        const diff = (dayOfWeek - next.getUTCDay() + 7) % 7 || 7;
+        const diff = (dayOfWeek - next.getUTCDay() + 7) % 7 || period;
         next.setUTCDate(next.getUTCDate() + diff);
       } else {
-        next.setUTCDate(next.getUTCDate() + 7);
+        next.setUTCDate(next.getUTCDate() + period);
       }
       break;
+    }
     case "monthly":
       next.setUTCMonth(next.getUTCMonth() + 1);
       if (dayOfMonth) {
