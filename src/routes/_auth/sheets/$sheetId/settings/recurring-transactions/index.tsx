@@ -15,6 +15,7 @@ import { TransactionCategoryIcon } from "@/components/TransactionCategoryIcon";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { useSheetRecurringTransactionsQuery } from "@/queries/use-sheet-recurring-transactions-query";
+import { WEEKDAY_OPTIONS } from "@/utils/recurring-frequency-options";
 
 export const Route = createFileRoute(
   "/_auth/sheets/$sheetId/settings/recurring-transactions/",
@@ -114,6 +115,9 @@ function RecurringTransactionsPage() {
                       {item.frequency}
                       {item.dayOfMonth != null
                         ? ` · day ${item.dayOfMonth}`
+                        : ""}
+                      {item.dayOfWeek != null
+                        ? ` · ${WEEKDAY_OPTIONS[item.dayOfWeek].label}s`
                         : ""}
                       {item.paymentTypeName ? ` · ${item.paymentTypeName}` : ""}
                     </Text>

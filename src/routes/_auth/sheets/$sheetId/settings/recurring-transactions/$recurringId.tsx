@@ -29,19 +29,16 @@ import { useSheetRecurringTransactionsQuery } from "@/queries/use-sheet-recurrin
 import { useUpdateRecurringTransactionMutation } from "@/queries/use-update-recurring-transaction-mutation";
 import { useDeleteRecurringTransactionMutation } from "@/queries/use-delete-recurring-transaction-mutation";
 import type { RecurringFrequency } from "@/lib/recurring-transactions-requests";
+import {
+  FREQUENCY_OPTIONS,
+  WEEKDAY_OPTIONS,
+} from "@/utils/recurring-frequency-options";
 
 export const Route = createFileRoute(
   "/_auth/sheets/$sheetId/settings/recurring-transactions/$recurringId",
 )({
   component: EditRecurringPage,
 });
-
-const FREQUENCY_OPTIONS = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-];
 
 interface FormValues {
   type: "income" | "expense";
@@ -50,6 +47,7 @@ interface FormValues {
   amount: number | "";
   frequency: RecurringFrequency;
   dayOfMonth: number | "";
+  dayOfWeek: string;
   description: string;
 }
 
@@ -80,6 +78,7 @@ function EditRecurringPage() {
       amount: "",
       frequency: "monthly",
       dayOfMonth: "",
+      dayOfWeek: String(new Date().getDay()),
       description: "",
     },
     validate: {
@@ -100,6 +99,12 @@ function EditRecurringPage() {
       amount: recurring.amount,
       frequency: recurring.frequency,
       dayOfMonth: recurring.dayOfMonth ?? "",
+      dayOfWeek: String(
+        recurring.dayOfWeek ??
+          (recurring.nextProcessDate
+            ? new Date(`${recurring.nextProcessDate}T00:00:00Z`).getUTCDay()
+            : new Date().getDay()),
+      ),
       description: recurring.description ?? "",
     });
     form.resetDirty();
@@ -132,6 +137,8 @@ function EditRecurringPage() {
             values.frequency === "monthly" && values.dayOfMonth !== ""
               ? Number(values.dayOfMonth)
               : null,
+          dayOfWeek:
+            values.frequency === "weekly" ? Number(values.dayOfWeek) : null,
         },
       },
       {
@@ -263,6 +270,14 @@ function EditRecurringPage() {
                   min={1}
                   max={31}
                   {...form.getInputProps("dayOfMonth")}
+                />
+              )}
+              {form.values.frequency === "weekly" && (
+                <Select
+                  label="Day of week"
+                  data={WEEKDAY_OPTIONS}
+                  allowDeselect={false}
+                  {...form.getInputProps("dayOfWeek")}
                 />
               )}
               <Textarea
