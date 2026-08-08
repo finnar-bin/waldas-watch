@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -10,18 +10,22 @@ import {
   Modal,
   Select,
   Stack,
+  Switch,
   Text,
   Textarea,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
-import { Trash2 } from "lucide-react";
+import { Info, Trash2 } from "lucide-react";
 import { SheetHeader } from "@/components/SheetHeader";
 import { BackLink } from "@/components/BackLink";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { useSheetCurrencyQuery } from "@/queries/use-sheet-currency-query";
+import { useSheetBudgetRolloverQuery } from "@/queries/use-sheet-budget-rollover-query";
 import { useUpdateSheetMutation } from "@/queries/use-update-sheet-mutation";
 import { useUpdateSheetCurrencyMutation } from "@/queries/use-update-sheet-currency-mutation";
+import { useUpdateSheetBudgetRolloverMutation } from "@/queries/use-update-sheet-budget-rollover-mutation";
 import { useDeleteSheetMutation } from "@/queries/use-delete-sheet-mutation";
 import { CURRENCIES } from "@/lib/constants/currencies";
 
@@ -40,6 +44,7 @@ interface FormValues {
   name: string;
   description: string;
   currency: string;
+  budgetRolloverEnabled: boolean;
 }
 
 function GeneralSettingsPage() {
@@ -52,6 +57,7 @@ function GeneralSettingsPage() {
   const sheetName = sheet?.name ?? "…";
 
   const { data: currency } = useSheetCurrencyQuery(sheetId);
+  const { data: budgetRollover } = useSheetBudgetRolloverQuery(sheetId);
 
   const {
     mutate: mutateSheet,
@@ -63,10 +69,15 @@ function GeneralSettingsPage() {
     isPending: currencyPending,
     isSuccess: currencySuccess,
   } = useUpdateSheetCurrencyMutation(sheetId);
+  const {
+    mutate: mutateBudgetRollover,
+    isPending: budgetRolloverPending,
+    isSuccess: budgetRolloverSuccess,
+  } = useUpdateSheetBudgetRolloverMutation(sheetId);
   const deleteMutation = useDeleteSheetMutation(session?.user.id);
 
-  const isPending = sheetPending || currencyPending;
-  const isSuccess = sheetSuccess && currencySuccess;
+  const isPending = sheetPending || currencyPending || budgetRolloverPending;
+  const isSuccess = sheetSuccess && currencySuccess && budgetRolloverSuccess;
 
   const [
     deleteModalOpened,
@@ -75,27 +86,38 @@ function GeneralSettingsPage() {
   const [deleteConfirmValue, setDeleteConfirmValue] = useState("");
 
   const form = useForm<FormValues>({
-    initialValues: { name: "", description: "", currency: "USD" },
+    initialValues: {
+      name: "",
+      description: "",
+      currency: "USD",
+      budgetRolloverEnabled: false,
+    },
     validate: {
       name: (v) => (v.trim().length === 0 ? "Name is required" : null),
     },
   });
 
+  const hasSeededRef = useRef(false);
+
   useEffect(() => {
-    if (sheet && currency && !form.isDirty()) {
-      form.setValues({
+    if (sheet && currency && budgetRollover && !hasSeededRef.current) {
+      hasSeededRef.current = true;
+      const values = {
         name: sheet.name,
         description: sheet.description ?? "",
         currency,
-      });
+        budgetRolloverEnabled: budgetRollover.enabled,
+      };
+      form.setValues(values);
+      form.resetDirty(values);
     }
-  }, [sheet, currency]);
+  }, [sheet, currency, budgetRollover]);
 
   function handleSubmit(values: FormValues) {
     let completed = 0;
-    const onBothDone = () => {
+    const onAllDone = () => {
       completed++;
-      if (completed === 2) form.resetDirty();
+      if (completed === 3) form.resetDirty();
     };
 
     mutateSheet(
@@ -103,11 +125,15 @@ function GeneralSettingsPage() {
         name: values.name.trim(),
         description: values.description.trim() || null,
       },
-      { onSuccess: onBothDone },
+      { onSuccess: onAllDone },
     );
     mutateCurrency(
       { currency: values.currency, updatedBy: session!.user.id },
-      { onSuccess: onBothDone },
+      { onSuccess: onAllDone },
+    );
+    mutateBudgetRollover(
+      { enabled: values.budgetRolloverEnabled, updatedBy: session!.user.id },
+      { onSuccess: onAllDone },
     );
   }
 
@@ -198,6 +224,32 @@ function GeneralSettingsPage() {
                 searchable
                 allowDeselect={false}
                 {...form.getInputProps("currency")}
+              />
+              <Switch
+                mt="6px"
+                label={
+                  <Group gap={4} wrap="nowrap">
+                    <Text size="sm" fw={500}>
+                      Carry over unused budget
+                    </Text>
+                    <Tooltip
+                      label="If a category's budget isn't fully spent, the leftover carries into next month's budget for that category. Going over budget doesn't carry over — only unused amounts do."
+                      withArrow
+                      multiline
+                      w={240}
+                      events={{ hover: true, focus: true, touch: true }}
+                    >
+                      <Info
+                        size={14}
+                        style={{ cursor: "help", flexShrink: 0 }}
+                      />
+                    </Tooltip>
+                  </Group>
+                }
+                description="Di nagastos last month? Idadagdag sa budget ngayong buwan — pero 'wag umasa, ha."
+                {...form.getInputProps("budgetRolloverEnabled", {
+                  type: "checkbox",
+                })}
               />
               <Button
                 type="submit"

@@ -20,6 +20,7 @@ import { TransactionCategoryIcon } from "@/components/TransactionCategoryIcon";
 import { useSession } from "@/providers/SessionProvider";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { useSheetCurrencyQuery } from "@/queries/use-sheet-currency-query";
+import { useSheetCategoryBudgetRolloversQuery } from "@/queries/use-sheet-category-budget-rollovers-query";
 import { useCategoryTransactionsQuery } from "@/queries/use-category-transactions-query";
 import { useCategoryQuery } from "@/queries/use-category-query";
 import { formatCurrency } from "@/utils/format-currency";
@@ -92,6 +93,12 @@ function CategoryTransactionsPage() {
     year,
     month,
   );
+  const { data: rolloverMap } = useSheetCategoryBudgetRolloversQuery(
+    sheetId,
+    year,
+    month,
+    category?.type ?? type,
+  );
 
   const listRef = useRef<HTMLDivElement>(null);
   const virtualizer = useWindowVirtualizer({
@@ -102,15 +109,18 @@ function CategoryTransactionsPage() {
   });
 
   const budget = category?.budget ?? null;
+  const rolloverAmount = rolloverMap?.get(categoryId) ?? 0;
+  const effectiveBudget = budget != null ? budget + rolloverAmount : null;
   const totalAmount = useMemo(
     () => transactions?.reduce((sum: number, tx) => sum + tx.amount, 0) ?? 0,
     [transactions],
   );
-  const budgetPct = budget != null ? (totalAmount / budget) * 100 : null;
+  const budgetPct =
+    effectiveBudget != null ? (totalAmount / effectiveBudget) * 100 : null;
   const isOverBudget = budgetPct != null && budgetPct > 100;
   const isNearBudget = budgetPct != null && budgetPct >= 85 && budgetPct < 100;
   const barColor =
-    budget != null
+    effectiveBudget != null
       ? isOverBudget
         ? "red"
         : isNearBudget
@@ -164,9 +174,11 @@ function CategoryTransactionsPage() {
               <Text size="md" fw={700}>
                 {formatCurrency(totalAmount, currency)}
               </Text>
-              {budget != null && (
+              {effectiveBudget != null && (
                 <Text size="xs" c="dimmed">
-                  of {formatCurrency(budget, currency)}
+                  of {formatCurrency(effectiveBudget, currency)}
+                  {rolloverAmount > 0 &&
+                    ` (+${formatCurrency(rolloverAmount, currency)} carried over)`}
                 </Text>
               )}
             </Stack>

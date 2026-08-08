@@ -23,6 +23,7 @@ export function useUpdateTransactionMutation(sheetId: string, categoryId: string
       queryClient.invalidateQueries({ queryKey: ['current-month-sheet-totals', sheetId] })
       queryClient.invalidateQueries({ queryKey: ['current-month-sheet-category-totals', sheetId] })
       queryClient.invalidateQueries({ queryKey: ['sheet-transactions-infinite', sheetId] })
+      queryClient.invalidateQueries({ queryKey: ['sheet-category-budget-rollovers', sheetId] })
     },
   })
 

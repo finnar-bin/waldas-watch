@@ -1,5 +1,7 @@
 import { supabase } from './supabase-client'
 import { formatLocalDate } from '@/utils/format-local-date'
+import { computeBudgetRollover, monthStartDateString } from '@/utils/compute-budget-rollover'
+import { getSheetBudgetRollover, getSheetCategoryMonthlySpend } from './sheet-settings-requests'
 
 export type TransactionDetail = {
   id: string
@@ -184,14 +186,12 @@ export async function getCurrentMonthSheetTotals(
   sheetId: string,
 ): Promise<MonthlySheetTotals> {
   const now = new Date()
-  const monthStart = formatLocalDate(
-    new Date(now.getFullYear(), now.getMonth(), 1),
-  )
-  const monthEnd = formatLocalDate(
-    new Date(now.getFullYear(), now.getMonth() + 1, 0),
-  )
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const monthStart = formatLocalDate(new Date(year, now.getMonth(), 1))
+  const monthEnd = formatLocalDate(new Date(year, now.getMonth() + 1, 0))
 
-  const [{ data, error }, { data: categories, error: categoriesError }] =
+  const [{ data, error }, { data: categories, error: categoriesError }, budgetRollover] =
     await Promise.all([
       supabase
         .from('transactions')
@@ -201,10 +201,11 @@ export async function getCurrentMonthSheetTotals(
         .lte('date', monthEnd),
       supabase
         .from('categories')
-        .select('id, budget')
+        .select('id, budget, created_at')
         .eq('sheet_id', sheetId)
         .eq('type', 'expense')
         .gt('budget', 0),
+      getSheetBudgetRollover(sheetId),
     ])
 
   if (error) throw error
@@ -221,6 +222,29 @@ export async function getCurrentMonthSheetTotals(
   const budgetMap = new Map(
     (categories ?? []).map((c) => [c.id, Number(c.budget)])
   )
+
+  if (budgetRollover.enabled && budgetRollover.enabledAt) {
+    const monthlySpend = await getSheetCategoryMonthlySpend(
+      sheetId,
+      'expense',
+      monthStartDateString(budgetRollover.enabledAt),
+    )
+    const rolloverMap = computeBudgetRollover({
+      categories: (categories ?? []).map((c) => ({
+        id: c.id,
+        budget: Number(c.budget),
+        createdAt: c.created_at,
+      })),
+      monthlySpend,
+      enabledAt: budgetRollover.enabledAt,
+      targetYear: year,
+      targetMonth: month,
+    })
+    for (const [categoryId, rollover] of rolloverMap) {
+      budgetMap.set(categoryId, (budgetMap.get(categoryId) ?? 0) + rollover)
+    }
+  }
+
   const spentByCategory = new Map<string, number>()
   for (const row of rows.filter((r) => r.type === 'expense')) {
     spentByCategory.set(

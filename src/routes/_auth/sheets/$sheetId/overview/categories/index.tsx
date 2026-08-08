@@ -20,6 +20,7 @@ import { MonthlySheetNote } from "@/components/MonthlySheetNote";
 import { useSession } from "@/providers/SessionProvider";
 import { useSheetTransactionOverviewQuery } from "@/queries/use-sheet-transaction-overview-query";
 import { useSheetCurrencyQuery } from "@/queries/use-sheet-currency-query";
+import { useSheetCategoryBudgetRolloversQuery } from "@/queries/use-sheet-category-budget-rollovers-query";
 import { useUserSheetsQuery } from "@/queries/use-user-sheets-query";
 import { formatCurrency } from "@/utils/format-currency";
 
@@ -76,31 +77,50 @@ function CategoriesPage() {
     month,
     type,
   );
+  const { data: rolloverMap } = useSheetCategoryBudgetRolloversQuery(
+    sheetId,
+    year,
+    month,
+    type,
+  );
 
   const items = useMemo(() => {
     if (!categories) return [];
     const maxAmount = Math.max(...categories.map((c) => c.totalAmount), 1);
     return categories.map((cat) => {
+      const rolloverAmount = rolloverMap?.get(cat.categoryId) ?? 0;
+      const effectiveBudget =
+        cat.budget != null ? cat.budget + rolloverAmount : null;
       const budgetPct =
-        cat.budget != null ? (cat.totalAmount / cat.budget) * 100 : null;
+        effectiveBudget != null
+          ? (cat.totalAmount / effectiveBudget) * 100
+          : null;
       const isOverBudget = budgetPct != null && budgetPct > 100;
       const isNearBudget =
         budgetPct != null && budgetPct >= 85 && budgetPct < 100;
       const barValue =
-        cat.budget != null
+        effectiveBudget != null
           ? Math.min(budgetPct!, 100)
           : (cat.totalAmount / maxAmount) * 100;
       const barColor =
-        cat.budget != null
+        effectiveBudget != null
           ? isOverBudget
             ? "red"
             : isNearBudget
               ? "orange"
               : "teal"
           : "gray";
-      return { cat, isOverBudget, isNearBudget, barValue, barColor };
+      return {
+        cat,
+        effectiveBudget,
+        rolloverAmount,
+        isOverBudget,
+        isNearBudget,
+        barValue,
+        barColor,
+      };
     });
-  }, [categories]);
+  }, [categories, rolloverMap]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const virtualizer = useWindowVirtualizer({
@@ -187,8 +207,15 @@ function CategoriesPage() {
             }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const { cat, isOverBudget, isNearBudget, barValue, barColor } =
-                items[virtualItem.index];
+              const {
+                cat,
+                effectiveBudget,
+                rolloverAmount,
+                isOverBudget,
+                isNearBudget,
+                barValue,
+                barColor,
+              } = items[virtualItem.index];
               return (
                 <div
                   key={virtualItem.key}
@@ -214,15 +241,17 @@ function CategoriesPage() {
                     }}
                   >
                     <Paper radius="lg" p="sm" shadow="sm">
-                      <Group justify="space-between" mb={8}>
-                        <Group gap="xs">
-                          <TransactionCategoryIcon
-                            icon={cat.categoryIcon}
-                            size={16}
-                          />
-                          <Text size="sm" fw={600}>
-                            {cat.categoryName}
-                          </Text>
+                      <Group justify="space-between" align="center" wrap="wrap" mb={8}>
+                        <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                          <Group gap="xs" wrap="nowrap" align="center">
+                            <TransactionCategoryIcon
+                              icon={cat.categoryIcon}
+                              size={16}
+                            />
+                            <Text size="sm" fw={600}>
+                              {cat.categoryName}
+                            </Text>
+                          </Group>
                           {isOverBudget && (
                             <Text size="xs" c="red" fw={600}>
                               Over budget
@@ -233,14 +262,19 @@ function CategoriesPage() {
                               Almost at budget
                             </Text>
                           )}
-                        </Group>
-                        <Stack gap={0} align="flex-end">
+                        </Stack>
+                        <Stack gap={0} align="flex-end" style={{ minWidth: 0 }}>
                           <Text size="sm" fw={700}>
                             {formatCurrency(cat.totalAmount, currency)}
                           </Text>
-                          {cat.budget != null && (
+                          {effectiveBudget != null && (
                             <Text size="xs" c="dimmed">
-                              of {formatCurrency(cat.budget, currency)}
+                              of {formatCurrency(effectiveBudget, currency)}
+                            </Text>
+                          )}
+                          {rolloverAmount > 0 && (
+                            <Text size="xs" c="dimmed">
+                              (+{formatCurrency(rolloverAmount, currency)} carried over)
                             </Text>
                           )}
                         </Stack>

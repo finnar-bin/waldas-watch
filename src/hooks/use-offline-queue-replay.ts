@@ -20,7 +20,7 @@ import {
   deleteRecurringTransaction,
 } from '@/lib/recurring-transactions-requests'
 import { updateSheet } from '@/lib/sheets-requests'
-import { updateSheetCurrency } from '@/lib/sheet-settings-requests'
+import { updateSheetCurrency, updateSheetBudgetRollover } from '@/lib/sheet-settings-requests'
 
 export type QueueReplayState = {
   isSyncing: boolean
@@ -59,6 +59,8 @@ async function executeOperation(op: QueuedOperation): Promise<void> {
       return updateSheet(op.payload.sheetId, op.payload.input)
     case 'UPDATE_SHEET_CURRENCY':
       return updateSheetCurrency(op.payload.sheetId, op.payload.currency, op.payload.updatedBy)
+    case 'UPDATE_SHEET_BUDGET_ROLLOVER':
+      return updateSheetBudgetRollover(op.payload.sheetId, op.payload.enabled, op.payload.updatedBy)
   }
 }
 
@@ -71,6 +73,7 @@ function getInvalidationKeys(op: QueuedOperation): string[][] {
         ['current-month-sheet-totals', sheetId],
         ['current-month-sheet-category-totals', sheetId],
         ['sheet-transaction-overview', sheetId],
+        ['sheet-category-budget-rollovers', sheetId],
       ]
     }
     case 'UPDATE_TRANSACTION': {
@@ -82,6 +85,7 @@ function getInvalidationKeys(op: QueuedOperation): string[][] {
         ['recent-sheet-transactions', sheetId],
         ['current-month-sheet-totals', sheetId],
         ['current-month-sheet-category-totals', sheetId],
+        ['sheet-category-budget-rollovers', sheetId],
       ]
     }
     case 'DELETE_TRANSACTION': {
@@ -93,6 +97,7 @@ function getInvalidationKeys(op: QueuedOperation): string[][] {
         ['recent-sheet-transactions', sheetId],
         ['current-month-sheet-totals', sheetId],
         ['current-month-sheet-category-totals', sheetId],
+        ['sheet-category-budget-rollovers', sheetId],
       ]
     }
     case 'CREATE_CATEGORY':
@@ -101,6 +106,7 @@ function getInvalidationKeys(op: QueuedOperation): string[][] {
       return [
         ['sheet-categories', sheetId],
         ['sheet-transaction-categories', sheetId],
+        ['sheet-category-budget-rollovers', sheetId],
       ]
     }
     case 'DELETE_CATEGORY': {
@@ -113,6 +119,7 @@ function getInvalidationKeys(op: QueuedOperation): string[][] {
         ['sheet-transaction-overview', sheetId],
         ['current-month-sheet-totals', sheetId],
         ['current-month-sheet-category-totals', sheetId],
+        ['sheet-category-budget-rollovers', sheetId],
       ]
     }
     case 'CREATE_PAYMENT_TYPE':
@@ -135,6 +142,10 @@ function getInvalidationKeys(op: QueuedOperation): string[][] {
     case 'UPDATE_SHEET_CURRENCY': {
       const { sheetId } = op.payload
       return [['sheet-currency', sheetId]]
+    }
+    case 'UPDATE_SHEET_BUDGET_ROLLOVER': {
+      const { sheetId } = op.payload
+      return [['sheet-budget-rollover', sheetId], ['sheet-category-budget-rollovers', sheetId]]
     }
   }
 }

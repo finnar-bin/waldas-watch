@@ -114,6 +114,13 @@ export type QueuedOperation =
       timestamp: number
       retries: number
     }
+  | {
+      id: string
+      type: 'UPDATE_SHEET_BUDGET_ROLLOVER'
+      payload: { sheetId: string; enabled: boolean; updatedBy: string }
+      timestamp: number
+      retries: number
+    }
 
 export function getQueue(): QueuedOperation[] {
   try {
