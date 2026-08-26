@@ -6,7 +6,7 @@ export type BudgetRolloverCategory = {
 
 export type ComputeBudgetRolloverInput = {
   categories: BudgetRolloverCategory[]
-  monthlySpend: Map<string, Map<string, number>>
+  monthlySpend: Record<string, Record<string, number>>
   enabledAt: string | null
   targetYear: number
   targetMonth: number
@@ -55,8 +55,8 @@ export function computeBudgetRollover({
   enabledAt,
   targetYear,
   targetMonth,
-}: ComputeBudgetRolloverInput): Map<string, number> {
-  const result = new Map<string, number>()
+}: ComputeBudgetRolloverInput): Record<string, number> {
+  const result: Record<string, number> = {}
   if (!enabledAt) return result
 
   const enabledMonth = toYearMonth(enabledAt)
@@ -68,15 +68,15 @@ export function computeBudgetRollover({
     const anchor = laterYearMonth(enabledMonth, toYearMonth(category.createdAt))
     if (!isBefore(anchor, target)) continue
 
-    const categorySpend = monthlySpend.get(category.id)
+    const categorySpend = monthlySpend[category.id]
     let carry = 0
     let cursor = anchor
     while (isBefore(cursor, target)) {
-      const spent = categorySpend?.get(monthKey(cursor)) ?? 0
+      const spent = categorySpend?.[monthKey(cursor)] ?? 0
       carry = Math.max(0, category.budget + carry - spent)
       cursor = nextMonth(cursor)
     }
-    result.set(category.id, carry)
+    result[category.id] = carry
   }
 
   return result

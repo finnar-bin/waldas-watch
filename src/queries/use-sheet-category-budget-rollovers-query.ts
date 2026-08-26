@@ -11,9 +11,9 @@ async function fetchSheetCategoryBudgetRollovers(
   year: number,
   month: number,
   type: 'income' | 'expense',
-): Promise<Map<string, number>> {
+): Promise<Record<string, number>> {
   const { enabled, enabledAt } = await getSheetBudgetRollover(sheetId)
-  if (!enabled || !enabledAt) return new Map()
+  if (!enabled || !enabledAt) return {}
 
   const [categories, monthlySpend] = await Promise.all([
     getSheetCategories(sheetId),

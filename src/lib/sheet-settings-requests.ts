@@ -65,7 +65,7 @@ export async function getSheetCategoryMonthlySpend(
   sheetId: string,
   type: 'income' | 'expense',
   since: string,
-): Promise<Map<string, Map<string, number>>> {
+): Promise<Record<string, Record<string, number>>> {
   const { data, error } = await supabase.rpc('sheet_category_monthly_spend', {
     target_sheet_id: sheetId,
     target_type: type,
@@ -74,12 +74,12 @@ export async function getSheetCategoryMonthlySpend(
 
   if (error) throw error
 
-  const result = new Map<string, Map<string, number>>()
+  const result: Record<string, Record<string, number>> = {}
   for (const row of data ?? []) {
     const monthKey = (row.month as string).slice(0, 7)
-    const categorySpend = result.get(row.category_id) ?? new Map<string, number>()
-    categorySpend.set(monthKey, Number(row.spent))
-    result.set(row.category_id, categorySpend)
+    const categorySpend = result[row.category_id] ?? {}
+    categorySpend[monthKey] = Number(row.spent)
+    result[row.category_id] = categorySpend
   }
   return result
 }
