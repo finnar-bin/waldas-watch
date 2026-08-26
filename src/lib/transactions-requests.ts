@@ -240,7 +240,7 @@ export async function getCurrentMonthSheetTotals(
       targetYear: year,
       targetMonth: month,
     })
-    for (const [categoryId, rollover] of rolloverMap) {
+    for (const [categoryId, rollover] of Object.entries(rolloverMap)) {
       budgetMap.set(categoryId, (budgetMap.get(categoryId) ?? 0) + rollover)
     }
   }

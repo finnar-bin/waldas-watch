@@ -88,7 +88,7 @@ function CategoriesPage() {
     if (!categories) return [];
     const maxAmount = Math.max(...categories.map((c) => c.totalAmount), 1);
     return categories.map((cat) => {
-      const rolloverAmount = rolloverMap?.get(cat.categoryId) ?? 0;
+      const rolloverAmount = rolloverMap?.[cat.categoryId] ?? 0;
       const effectiveBudget =
         cat.budget != null ? cat.budget + rolloverAmount : null;
       const budgetPct =

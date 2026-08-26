@@ -109,7 +109,7 @@ function CategoryTransactionsPage() {
   });
 
   const budget = category?.budget ?? null;
-  const rolloverAmount = rolloverMap?.get(categoryId) ?? 0;
+  const rolloverAmount = rolloverMap?.[categoryId] ?? 0;
   const effectiveBudget = budget != null ? budget + rolloverAmount : null;
   const totalAmount = useMemo(
     () => transactions?.reduce((sum: number, tx) => sum + tx.amount, 0) ?? 0,
